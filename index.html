@@ -1,0 +1,2763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Smartrerinstudio — AI Novel to Comic & Tools</title>
+  <meta name="description" content="Smartrerinstudio - AI tools for Novel to Comic, Image, Video & Swap. Uncensored support with age verification. Inspired by Andromeda Galaxy." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #050a14;
+      --bg-secondary: #0a1224;
+      --bg-card: #111b2e;
+      --bg-hover: #1a2740;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --accent-glow: rgba(59, 130, 246, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e2d45;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ========== AGE + BOT GATE ========== */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #050a14 0%, #0c1a3a 40%, #0a1224 100%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .gate-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .gate-logo {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6, #1e40af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .gate-logo svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .gate-subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    .gate-section {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .gate-section h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .gate-section p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .birth-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .birth-row select {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .birth-row select:focus {
+      border-color: var(--accent);
+    }
+
+    .bot-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.2s;
+    }
+
+    .bot-check:hover {
+      border-color: var(--accent);
+    }
+
+    .bot-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .bot-check span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .captcha-box {
+      margin-top: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: none;
+    }
+
+    .captcha-box.active {
+      display: block;
+    }
+
+    .captcha-question {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+    }
+
+    .captcha-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .captcha-input:focus {
+      border-color: var(--accent);
+    }
+
+    .gate-btn {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .gate-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .gate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .gate-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .nsfw-notice {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: #fca5a5;
+      text-align: left;
+    }
+
+    /* ========== MAIN APP ========== */
+    #app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 26, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #7c5cfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nsfw-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .nsfw-badge.unlocked {
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .nsfw-badge.locked {
+      display: inline-block;
+      background: rgba(100, 116, 139, 0.2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 61px);
+    }
+
+    /* Sidebar Desktop */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    @media (min-width: 900px) {
+      .sidebar {
+        display: block;
+      }
+    }
+
+    .nav-section {
+      margin-bottom: 20px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0 10px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .nav-item .lock-icon {
+      margin-left: auto;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Mobile Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(18, 24, 38, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      z-index: 90;
+    }
+
+    @media (min-width: 900px) {
+      .bottom-nav {
+        display: none;
+      }
+      .main {
+        padding-bottom: 24px;
+      }
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--accent);
+    }
+
+    .bottom-nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Cards & Forms */
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .page-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-badge {
+      background: var(--accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .form-row.two {
+        grid-template-columns: 1fr 1fr;
+      }
+      .form-row.three {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Character Grid */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 12px;
+    }
+
+    .char-item {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .char-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .char-avatar {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      background: var(--bg-primary);
+      border: 2px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .char-item.selected .char-avatar {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .char-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Style selector */
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .style-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .style-item {
+      background: var(--bg-primary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+
+    .style-item:hover {
+      border-color: var(--accent);
+    }
+
+    .style-item.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+
+    .toggle-row span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-primary);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle.active::after {
+      transform: translateX(20px);
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-primary);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .upload-zone p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .upload-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 500px) {
+      .upload-preview {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .upload-slot {
+      aspect-ratio: 1;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--text-muted);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Output area */
+    .output-area {
+      min-height: 200px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* NSFW Lock Modal */
+    #nsfw-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #nsfw-modal.active {
+      display: flex;
+    }
+
+    /* Tool pages */
+    .tool-page {
+      display: none;
+    }
+
+    .tool-page.active {
+      display: block;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin: 16px 0;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--bg-primary);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* Project list */
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .project-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .project-item:hover {
+      border-color: var(--accent);
+    }
+
+    .project-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .project-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .project-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Footer note */
+    .footer-note {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Mobile padding for bottom nav */
+    @media (max-width: 899px) {
+      .main {
+        padding-bottom: 80px;
+      }
+    }
+
+    /* Character consistency options */
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ========== LOGO ========== */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    .logo {
+      font-size: 17px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #93c5fd, #3b82f6, #1d4ed8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ========== BERANDA / HOME ========== */
+    .hero {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      height: 280px;
+      margin-bottom: 24px;
+      background: #0a1224;
+    }
+    @media (min-width: 700px) {
+      .hero { height: 360px; }
+    }
+    .hero-slides {
+      position: absolute;
+      inset: 0;
+    }
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 24px;
+    }
+    .hero-slide.active {
+      opacity: 1;
+    }
+    .hero-slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(5,10,20,0.92) 0%, rgba(5,10,20,0.3) 50%, rgba(5,10,20,0.1) 100%);
+    }
+    .hero-caption {
+      position: relative;
+      z-index: 2;
+      max-width: 90%;
+    }
+    .hero-caption h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    @media (min-width: 700px) {
+      .hero-caption h2 { font-size: 28px; }
+    }
+    .hero-caption p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .hero-dots {
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+      z-index: 3;
+      display: flex;
+      gap: 6px;
+    }
+    .hero-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .hero-dot.active {
+      background: var(--accent);
+    }
+
+    .main-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .cta-novel {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6, #60a5fa);
+      border: none;
+      border-radius: 16px;
+      padding: 22px 24px;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-novel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
+    }
+    .cta-novel svg {
+      width: 28px;
+      height: 28px;
+    }
+    .cta-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    @media (min-width: 600px) {
+      .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (min-width: 900px) {
+      .tools-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tool-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      transform: translateY(-2px);
+    }
+    .tool-card-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .tool-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .tool-card-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* AI Assistant */
+    .assistant-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .assistant-header {
+      background: linear-gradient(90deg, #0a1224, #1e3a5f);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .assistant-body {
+      padding: 16px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .assistant-msg {
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .assistant-msg.bot {
+      color: var(--text-secondary);
+    }
+    .assistant-msg.user {
+      color: var(--accent-hover);
+      text-align: right;
+    }
+    .assistant-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .assistant-input-row input {
+      flex: 1;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .assistant-input-row button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Feedback */
+    .feedback-box textarea {
+      min-height: 90px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== AGE + BOT GATE ==================== -->
+  <div id="gate">
+    <div class="gate-card">
+      <div class="gate-logo">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="30" fill="url(#gal1)" opacity="0.3"/>
+          <ellipse cx="32" cy="32" rx="22" ry="10" fill="url(#gal2)" opacity="0.7" transform="rotate(-30 32 32)"/>
+          <ellipse cx="32" cy="32" rx="18" ry="7" fill="url(#gal3)" opacity="0.9" transform="rotate(-30 32 32)"/>
+          <circle cx="32" cy="32" r="5" fill="#93c5fd"/>
+          <circle cx="20" cy="22" r="1.5" fill="#bfdbfe"/>
+          <circle cx="44" cy="40" r="1.2" fill="#93c5fd"/>
+          <circle cx="38" cy="18" r="1" fill="#e0f2fe"/>
+          <defs>
+            <linearGradient id="gal1" x1="0" y1="0" x2="64" y2="64"><stop stop-color="#1e3a8a"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+            <linearGradient id="gal2" x1="10" y1="20" x2="54" y2="44"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1e40af"/></linearGradient>
+            <linearGradient id="gal3" x1="14" y1="25" x2="50" y2="40"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+          </defs>
+        </svg>
+        Smartrerinstudio
+      </div>
+      <div class="gate-subtitle">AI Novel to Comic & Creative Tools • Andromeda Edition</div>
+
+      <div class="gate-section">
+        <h3>Verifikasi Umur (18+)</h3>
+        <p>Masukkan bulan dan tahun lahir Anda untuk mengakses fitur. Fitur NSFW hanya tersedia untuk pengguna berusia 18 tahun ke atas.</p>
+        <div class="birth-row">
+          <select id="birth-month">
+            <option value="">Bulan</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
+          <select id="birth-year">
+            <option value="">Tahun</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="gate-section">
+        <h3>Verifikasi Bukan Bot</h3>
+        <div class="bot-check" id="bot-check-box">
+          <input type="checkbox" id="bot-check" />
+          <span>Saya bukan robot</span>
+        </div>
+        <div class="captcha-box" id="captcha-box">
+          <div class="captcha-question" id="captcha-question">Berapa 7 + 5?</div>
+          <input type="number" class="captcha-input" id="captcha-answer" placeholder="Jawaban..." />
+        </div>
+      </div>
+
+      <button class="gate-btn" id="gate-submit" disabled>Masuk ke Smartrerinstudio</button>
+      <div class="gate-error" id="gate-error"></div>
+
+      <div class="nsfw-notice">
+        ⚠️ Situs ini mendukung konten <strong>uncensored / NSFW</strong>. Dengan melanjutkan, Anda menyatakan bahwa Anda berusia minimal 18 tahun jika ingin mengakses fitur tersebut.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== NSFW UNLOCK MODAL ==================== -->
+  <div id="nsfw-modal">
+    <div class="gate-card">
+      <div class="gate-logo" style="font-size:22px;">Unlock NSFW</div>
+      <div class="gate-subtitle">Masukkan tanggal lahir untuk membuka fitur uncensored</div>
+      <div class="gate-section">
+        <div class="birth-row">
+          <select id="nsfw-month">
+            <option value="">Bulan</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
+          <select id="nsfw-year">
+            <option value="">Tahun</option>
+          </select>
+        </div>
+      </div>
+      <button class="gate-btn" id="nsfw-unlock-btn">Buka Fitur NSFW</button>
+      <button class="btn btn-secondary btn-full" style="margin-top:10px;" onclick="closeNsfwModal()">Batal</button>
+      <div class="gate-error" id="nsfw-error"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APP ==================== -->
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-wrap">
+          <svg class="logo-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="30" fill="url(#hgal1)" opacity="0.3"/>
+            <ellipse cx="32" cy="32" rx="22" ry="10" fill="url(#hgal2)" opacity="0.7" transform="rotate(-30 32 32)"/>
+            <ellipse cx="32" cy="32" rx="18" ry="7" fill="url(#hgal3)" opacity="0.9" transform="rotate(-30 32 32)"/>
+            <circle cx="32" cy="32" r="5" fill="#93c5fd"/>
+            <circle cx="20" cy="22" r="1.5" fill="#bfdbfe"/>
+            <circle cx="44" cy="40" r="1.2" fill="#93c5fd"/>
+            <defs>
+              <linearGradient id="hgal1" x1="0" y1="0" x2="64" y2="64"><stop stop-color="#1e3a8a"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="hgal2" x1="10" y1="20" x2="54" y2="44"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1e40af"/></linearGradient>
+              <linearGradient id="hgal3" x1="14" y1="25" x2="50" y2="40"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+            </defs>
+          </svg>
+          <div class="logo">Smartrerinstudio</div>
+        </div>
+        <span class="nsfw-badge locked" id="nsfw-badge">NSFW Locked</span>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="nsfw-toggle-btn" title="NSFW Settings" onclick="openNsfwModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </button>
+        <button class="icon-btn" title="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Sidebar (Desktop) -->
+      <aside class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Utama</div>
+          <div class="nav-item active" data-page="beranda" onclick="showPage('beranda')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Beranda
+          </div>
+          <div class="nav-item" data-page="novel-to-comic" onclick="showPage('novel-to-comic')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Novel to Comic
+          </div>
+          <div class="nav-item" data-page="projects" onclick="showPage('projects')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Proyek Saya
+          </div>
+          <div class="nav-item" data-page="masukan" onclick="showPage('masukan')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Masukan
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Novel Generator</div>
+          <div class="nav-item" data-page="ai-novel" onclick="showPage('ai-novel')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            AI Novel
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Image Generator</div>
+          <div class="nav-item" data-page="text-to-image" onclick="showPage('text-to-image')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Text to Image
+          </div>
+          <div class="nav-item" data-page="image-to-image" onclick="showPage('image-to-image')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Image to Image
+          </div>
+          <div class="nav-item" data-page="remove-watermark-img" onclick="showPage('remove-watermark-img')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Hapus Watermark
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Video Generator</div>
+          <div class="nav-item" data-page="image-to-video" onclick="showPage('image-to-video')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Image to Video
+          </div>
+          <div class="nav-item" data-page="frame-to-video" onclick="showPage('frame-to-video')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
+            Frame to Frame
+          </div>
+          <div class="nav-item" data-page="text-to-video" onclick="showPage('text-to-video')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            Text to Video
+          </div>
+          <div class="nav-item" data-page="video-to-video" onclick="showPage('video-to-video')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+            Video to Video
+          </div>
+          <div class="nav-item" data-page="remove-watermark-vid" onclick="showPage('remove-watermark-vid')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Hapus Watermark Video
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Swap Generator</div>
+          <div class="nav-item" data-page="face-swap-img" onclick="showPage('face-swap-img')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            Face Swap Image
+          </div>
+          <div class="nav-item" data-page="face-swap-vid" onclick="showPage('face-swap-vid')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Face Swap Video
+          </div>
+          <div class="nav-item" data-page="face-swap-batch" onclick="showPage('face-swap-batch')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Face Swap Batch
+          </div>
+          <div class="nav-item" data-page="head-swap" onclick="showPage('head-swap')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>
+            Head Swap
+          </div>
+          <div class="nav-item" data-page="body-swap" onclick="showPage('body-swap')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Body Swap
+          </div>
+          <div class="nav-item" data-page="style-swap" onclick="showPage('style-swap')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            Style Swap
+          </div>
+          <div class="nav-item" data-page="cloth-swap" onclick="showPage('cloth-swap')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+            Cloth Swap
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main">
+
+        <!-- ========== BERANDA ========== -->
+        <div class="tool-page active" id="page-beranda">
+          <!-- Hero Slideshow -->
+          <div class="hero">
+            <div class="hero-slides" id="hero-slides">
+              <div class="hero-slide active" style="background-image: linear-gradient(135deg,#0c1445 0%,#1e3a8a 40%,#312e81 100%);">
+                <div class="hero-caption">
+                  <h2>Photorealistic</h2>
+                  <p>Gambar ultra realistis dari teks & novel</p>
+                </div>
+              </div>
+              <div class="hero-slide" style="background-image: linear-gradient(135deg,#1a0533 0%,#4c1d95 40%,#7c3aed 100%);">
+                <div class="hero-caption">
+                  <h2>Anime Style</h2>
+                  <p>Gaya anime Jepang yang detail & ekspresif</p>
+                </div>
+              </div>
+              <div class="hero-slide" style="background-image: linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%);">
+                <div class="hero-caption">
+                  <h2>Komik & Manga</h2>
+                  <p>Panel komik siap baca dari cerita novel</p>
+                </div>
+              </div>
+              <div class="hero-slide" style="background-image: linear-gradient(135deg,#111 0%,#333 50%,#555 100%);">
+                <div class="hero-caption">
+                  <h2>Hitam Putih</h2>
+                  <p>Gaya klasik manga & noir yang elegan</p>
+                </div>
+              </div>
+              <div class="hero-slide" style="background-image: linear-gradient(135deg,#0c4a6e 0%,#0369a1 40%,#0ea5e9 100%);">
+                <div class="hero-caption">
+                  <h2>Hyperrealistic</h2>
+                  <p>Detail ekstrem hampir seperti foto asli</p>
+                </div>
+              </div>
+              <div class="hero-slide" style="background-image: linear-gradient(135deg,#4a044e 0%,#86198f 40%,#d946ef 100%);">
+                <div class="hero-caption">
+                  <h2>Webtoon & Manhwa</h2>
+                  <p>Format vertikal modern penuh warna</p>
+                </div>
+              </div>
+            </div>
+            <div class="hero-dots" id="hero-dots"></div>
+          </div>
+
+          <!-- Big CTA Novel to Comic -->
+          <div class="main-cta">
+            <button class="cta-novel" onclick="showPage('novel-to-comic')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Novel to Comic
+            </button>
+            <div class="cta-sub">Ubah cerita novel jadi komik visual dengan AI</div>
+          </div>
+
+          <!-- Other Tools Grid -->
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;color:var(--text-secondary);">AI Generator Lainnya</h3>
+          <div class="tools-grid">
+            <div class="tool-card" onclick="showPage('ai-novel')">
+              <div class="tool-card-icon">✍️</div>
+              <div class="tool-card-title">AI Novel</div>
+              <div class="tool-card-desc">Character + Outline</div>
+            </div>
+            <div class="tool-card" onclick="showPage('text-to-image')">
+              <div class="tool-card-icon">🎨</div>
+              <div class="tool-card-title">Text to Image</div>
+              <div class="tool-card-desc">Prompt → Gambar</div>
+            </div>
+            <div class="tool-card" onclick="showPage('image-to-image')">
+              <div class="tool-card-icon">🖼️</div>
+              <div class="tool-card-title">Image to Image</div>
+              <div class="tool-card-desc">Edit & Transform</div>
+            </div>
+            <div class="tool-card" onclick="showPage('image-to-video')">
+              <div class="tool-card-icon">🎬</div>
+              <div class="tool-card-title">Image to Video</div>
+              <div class="tool-card-desc">Gambar jadi video</div>
+            </div>
+            <div class="tool-card" onclick="showPage('text-to-video')">
+              <div class="tool-card-icon">📽️</div>
+              <div class="tool-card-title">Text to Video</div>
+              <div class="tool-card-desc">Prompt → Video</div>
+            </div>
+            <div class="tool-card" onclick="showPage('face-swap-img')">
+              <div class="tool-card-icon">🔄</div>
+              <div class="tool-card-title">Face Swap</div>
+              <div class="tool-card-desc">Image & Video</div>
+            </div>
+            <div class="tool-card" onclick="showPage('remove-watermark-img')">
+              <div class="tool-card-icon">🧹</div>
+              <div class="tool-card-title">Hapus Watermark</div>
+              <div class="tool-card-desc">Gambar & Video</div>
+            </div>
+            <div class="tool-card" onclick="showPage('projects')">
+              <div class="tool-card-icon">📁</div>
+              <div class="tool-card-title">Proyek Saya</div>
+              <div class="tool-card-desc">Riwayat kerja</div>
+            </div>
+          </div>
+
+          <!-- AI Assistant -->
+          <div class="assistant-box">
+            <div class="assistant-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14v1a4 4 0 0 1-8 0v-1"/><path d="M12 18v4"/><path d="M8 22h8"/></svg>
+              Asisten AI Smartrerinstudio
+            </div>
+            <div class="assistant-body" id="assistant-body">
+              <div class="assistant-msg bot">Halo! Saya asisten AI Smartrerinstudio. Ada yang bisa saya bantu? Tanya tentang cara pakai tools, tips prompt, atau ide cerita.</div>
+            </div>
+            <div class="assistant-input-row">
+              <input type="text" id="assistant-input" placeholder="Tanya sesuatu..." onkeydown="if(event.key==='Enter')sendAssistant()" />
+              <button onclick="sendAssistant()">Kirim</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== NOVEL TO COMIC ========== -->
+        <div class="tool-page" id="page-novel-to-comic">
+          <h1 class="page-title">Novel to Comic</h1>
+          <p class="page-desc">Ubah cerita novel Anda menjadi komik dengan bantuan AI</p>
+
+          <div class="card">
+            <div class="card-title"><span class="step-badge">1</span> Input Novel / Pilih File</div>
+            <div class="form-row">
+              <div>
+                <label>Teks Novel (max 15000 karakter)</label>
+                <textarea id="novel-text" placeholder="Tempelkan naskah novel Anda di sini..." maxlength="15000"></textarea>
+                <div style="text-align:right;font-size:12px;color:var(--text-muted);margin-top:4px;">
+                  <span id="char-count">0</span>/15000
+                </div>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Judul Novel</label>
+                <input type="text" id="novel-title" placeholder="Contoh: Rerin - Theia - Nyx" />
+              </div>
+              <div>
+                <label>Jumlah Chapter (opsional)</label>
+                <input type="number" id="novel-chapters" placeholder="70" min="1" max="500" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="step-badge">2</span> Referensi Karakter</div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Pilih atau tambah karakter untuk menjaga konsistensi wajah</p>
+            <div class="char-grid" id="char-grid">
+              <div class="char-item selected" data-char="rerin">
+                <div class="char-avatar">🧑‍🎓</div>
+                <div class="char-name">Rerin</div>
+              </div>
+              <div class="char-item" data-char="theia">
+                <div class="char-avatar">👩‍🦰</div>
+                <div class="char-name">Theia</div>
+              </div>
+              <div class="char-item" data-char="nyx">
+                <div class="char-avatar">👩‍🚀</div>
+                <div class="char-name">Nyx</div>
+              </div>
+              <div class="char-item" data-char="xuanyi">
+                <div class="char-avatar">🧑‍💻</div>
+                <div class="char-name">Xuan Yi</div>
+              </div>
+              <div class="char-item" onclick="alert('Fitur upload karakter akan tersedia setelah integrasi API')">
+                <div class="char-avatar">+</div>
+                <div class="char-name">Tambah</div>
+              </div>
+            </div>
+            <div class="option-list" style="margin-top:16px;">
+              <div class="toggle-row">
+                <span>Gunakan wajah referensi</span>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div class="toggle-row">
+                <span>Jaga kemiripan wajah & outfit</span>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="step-badge">3</span> Gaya & Pengaturan</div>
+            <label style="margin-bottom:10px;">Gaya Komik</label>
+            <div class="style-grid" id="style-grid">
+              <div class="style-item active" data-style="anime">Anime</div>
+              <div class="style-item" data-style="realistic">Realistis</div>
+              <div class="style-item" data-style="manhwa">Manhwa</div>
+              <div class="style-item" data-style="manga">Manga</div>
+              <div class="style-item" data-style="webtoon">Webtoon</div>
+              <div class="style-item" data-style="custom">Custom</div>
+            </div>
+            <div class="form-row" style="margin-top:16px;">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select id="comic-model" class="model-select">
+                  <option value="flux">Flux (Default)</option>
+                  <option value="qwen">Qwen</option>
+                  <option value="grok-imagine">Grok Imagine</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="banana">Banana</option>
+                  <option value="sdxl">SDXL</option>
+                  <!-- NSFW models - only shown when unlocked -->
+                  <option value="flux-uncensored" class="nsfw-model" style="display:none;">Flux Uncensored (NSFW)</option>
+                  <option value="pony" class="nsfw-model" style="display:none;">Pony Diffusion (NSFW)</option>
+                  <option value="anything" class="nsfw-model" style="display:none;">Anything V5 Uncensored</option>
+                  <option value="qwen-nsfw" class="nsfw-model" style="display:none;">Qwen Uncensored</option>
+                  <option value="autismmix" class="nsfw-model" style="display:none;">AutismMix (NSFW)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row three">
+              <div>
+                <label>Rasio Panel</label>
+                <select id="panel-ratio">
+                  <option>2:3 (Standar)</option>
+                  <option>3:4</option>
+                  <option>1:1</option>
+                  <option>9:16</option>
+                </select>
+              </div>
+              <div>
+                <label>Panel per Halaman</label>
+                <select id="panel-count">
+                  <option>3 - 6 Panel</option>
+                  <option>2 - 4 Panel</option>
+                  <option>4 - 8 Panel</option>
+                  <option>1 Panel (Full)</option>
+                </select>
+              </div>
+              <div>
+                <label>Kualitas Gambar</label>
+                <select id="img-quality">
+                  <option>Ultra HD (8K)</option>
+                  <option>HD (4K)</option>
+                  <option>Standard</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Bahasa Dialog</label>
+                <select id="dialog-lang">
+                  <option>Indonesia</option>
+                  <option>English</option>
+                  <option>日本語</option>
+                  <option>한국어</option>
+                </select>
+              </div>
+              <div>
+                <label>Kontrol Gaya</label>
+                <select id="style-control">
+                  <option>Anime Realistis</option>
+                  <option>Pure Anime</option>
+                  <option>Semi-Realistic</option>
+                  <option>Painterly</option>
+                </select>
+              </div>
+            </div>
+            <div class="option-list">
+              <div class="toggle-row">
+                <span>Tambahkan Narasi</span>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div class="toggle-row">
+                <span>Teks Balon Otomatis</span>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div class="toggle-row">
+                <span>Efek Suara (SFX)</span>
+                <div class="toggle" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div class="toggle-row" id="nsfw-option-row" style="display:none;">
+                <span style="color:#fca5a5;">Izinkan Konten NSFW / Uncensored</span>
+                <div class="toggle" id="nsfw-gen-toggle" onclick="this.classList.toggle('active')"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="step-badge">4</span> Hasil Output</div>
+            <div class="output-area" id="comic-output">
+              Hasil komik akan muncul di sini setelah generate.<br>
+              <small style="opacity:0.7;">(Demo mode — integrasi API AI akan ditambahkan nanti)</small>
+            </div>
+            <div class="progress-wrap" id="comic-progress">
+              <div class="progress-bar"><div class="progress-fill" id="comic-progress-fill"></div></div>
+              <div class="progress-text" id="comic-progress-text">Menyiapkan...</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+              <button class="btn btn-primary" style="flex:1;" onclick="generateComic()">✨ Buat Komik dengan AI</button>
+              <button class="btn btn-secondary" onclick="saveProject()">💾 Simpan</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== AI NOVEL ========== -->
+        <div class="tool-page" id="page-ai-novel">
+          <h1 class="page-title">AI Novel</h1>
+          <p class="page-desc">Generate detail karakter + story outline (max 15000 karakter)</p>
+          <div class="card">
+            <div class="form-row">
+              <div>
+                <label>Prompt / Ide Cerita</label>
+                <textarea id="ai-novel-prompt" placeholder="Contoh: Novel fantasi tentang siswa SMA yang bisa kembali ke masa lalu..." maxlength="2000"></textarea>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Genre</label>
+                <select>
+                  <option>Fantasi</option>
+                  <option>Sci-Fi</option>
+                  <option>Romance</option>
+                  <option>Action</option>
+                  <option>Horror</option>
+                  <option>Slice of Life</option>
+                </select>
+              </div>
+              <div>
+                <label>Panjang Outline</label>
+                <select>
+                  <option>Pendek (~3000 karakter)</option>
+                  <option>Sedang (~8000 karakter)</option>
+                  <option>Panjang (max 15000 karakter)</option>
+                </select>
+              </div>
+            </div>
+            <div class="toggle-row" id="nsfw-novel-row" style="display:none;">
+              <span style="color:#fca5a5;">Izinkan elemen NSFW</span>
+              <div class="toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('ai-novel-output')">✨ Generate Novel Outline</button>
+            <div class="output-area" id="ai-novel-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== TEXT TO IMAGE ========== -->
+        <div class="tool-page" id="page-text-to-image">
+          <h1 class="page-title">AI Text to Image</h1>
+          <p class="page-desc">Generate gambar dari teks prompt</p>
+          <div class="card">
+            <div class="form-row">
+              <div>
+                <label>Prompt</label>
+                <textarea id="tti-prompt" placeholder="A beautiful anime girl with green eyes standing in a magical forest..."></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="flux">Flux (Default)</option>
+                  <option value="qwen">Qwen</option>
+                  <option value="grok-imagine">Grok Imagine</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="banana">Banana</option>
+                  <option value="sdxl">SDXL</option>
+                  <option value="flux-uncensored" class="nsfw-model" style="display:none;">Flux Uncensored (NSFW)</option>
+                  <option value="pony" class="nsfw-model" style="display:none;">Pony Diffusion (NSFW)</option>
+                  <option value="anything" class="nsfw-model" style="display:none;">Anything V5 Uncensored</option>
+                  <option value="qwen-nsfw" class="nsfw-model" style="display:none;">Qwen Uncensored</option>
+                  <option value="autismmix" class="nsfw-model" style="display:none;">AutismMix (NSFW)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Aspect Ratio</label>
+                <select>
+                  <option>1:1</option>
+                  <option>3:4</option>
+                  <option>9:16</option>
+                  <option>16:9</option>
+                </select>
+              </div>
+              <div>
+                <label>Steps</label>
+                <input type="number" value="30" min="10" max="100" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>CFG Scale</label>
+                <input type="number" value="7" min="1" max="20" step="0.5" />
+              </div>
+            </div>
+            <div class="toggle-row" id="nsfw-tti-row" style="display:none;">
+              <span style="color:#fca5a5;">NSFW Mode</span>
+              <div class="toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="generateTextToImage()">🎨 Generate Image (Gratis via Pollinations)</button>
+            <div class="output-area" id="tti-output" style="margin-top:16px;">Preview gambar akan muncul di sini...<br><small style="opacity:0.7;">Pakai Pollinations (Flux) — gratis, rate limit ~15 detik</small></div>
+          </div>
+        </div>
+
+        <!-- ========== IMAGE TO IMAGE ========== -->
+        <div class="tool-page" id="page-image-to-image">
+          <h1 class="page-title">AI Image to Image Editor</h1>
+          <p class="page-desc">Upload hingga 4 gambar + prompt untuk editing</p>
+          <div class="card">
+            <label>Upload Gambar (max 4)</label>
+            <div class="upload-zone" onclick="document.getElementById('i2i-file').click()">
+              📷 Klik atau drag & drop gambar
+              <p>Format: JPG, PNG, WEBP • Max 4 file</p>
+            </div>
+            <input type="file" id="i2i-file" accept="image/*" multiple hidden onchange="previewImages(this, 'i2i-preview')" />
+            <div class="upload-preview" id="i2i-preview">
+              <div class="upload-slot">1</div>
+              <div class="upload-slot">2</div>
+              <div class="upload-slot">3</div>
+              <div class="upload-slot">4</div>
+            </div>
+            <div class="form-row" style="margin-top:16px;">
+              <div>
+                <label>Prompt</label>
+                <textarea placeholder="Describe the changes you want..."></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="flux">Flux (Default)</option>
+                  <option value="qwen">Qwen</option>
+                  <option value="grok-imagine">Grok Imagine</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="banana">Banana</option>
+                  <option value="sdxl">SDXL + ControlNet</option>
+                  <option value="flux-uncensored" class="nsfw-model" style="display:none;">Flux Uncensored (NSFW)</option>
+                  <option value="pony" class="nsfw-model" style="display:none;">Pony Diffusion (NSFW)</option>
+                  <option value="anything" class="nsfw-model" style="display:none;">Anything V5 Uncensored</option>
+                  <option value="qwen-nsfw" class="nsfw-model" style="display:none;">Qwen Uncensored</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Strength</label>
+                <input type="number" value="0.65" min="0.1" max="1" step="0.05" />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('i2i-output')">✨ Generate</button>
+            <div class="output-area" id="i2i-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== REMOVE WATERMARK IMAGE ========== -->
+        <div class="tool-page" id="page-remove-watermark-img">
+          <h1 class="page-title">Hapus Watermark Gambar</h1>
+          <p class="page-desc">Upload gambar yang ada watermark-nya</p>
+          <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('rw-img-file').click()">
+              🖼️ Upload gambar
+              <p>JPG, PNG, WEBP</p>
+            </div>
+            <input type="file" id="rw-img-file" accept="image/*" hidden />
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('rw-img-output')">🧹 Hapus Watermark</button>
+            <div class="output-area" id="rw-img-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== IMAGE TO VIDEO ========== -->
+        <div class="tool-page" id="page-image-to-video">
+          <h1 class="page-title">AI Image to Video</h1>
+          <p class="page-desc">Ubah gambar menjadi video pendek</p>
+          <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('i2v-file').click()">
+              📷 Upload gambar sumber
+            </div>
+            <input type="file" id="i2v-file" accept="image/*" hidden />
+            <div class="form-row" style="margin-top:16px;">
+              <div>
+                <label>Prompt Gerakan</label>
+                <textarea placeholder="Camera slowly zooms in, character blinks, wind blows hair..."></textarea>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="svd">SVD</option>
+                  <option value="animatediff">AnimateDiff</option>
+                  <option value="flux-video">Flux Video</option>
+                  <option value="qwen-video">Qwen Video</option>
+                  <option value="grok-video">Grok Video</option>
+                </select>
+              </div>
+              <div>
+                <label>Durasi</label>
+                <select>
+                  <option>4 detik</option>
+                  <option>6 detik</option>
+                  <option>8 detik</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('i2v-output')">🎬 Generate Video</button>
+            <div class="output-area" id="i2v-output" style="margin-top:16px;">Video akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== FRAME TO FRAME ========== -->
+        <div class="tool-page" id="page-frame-to-video">
+          <h1 class="page-title">AI Frame to Frame Video</h1>
+          <p class="page-desc">Upload max 10 frame + prompt</p>
+          <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('f2f-file').click()">
+              🖼️ Upload frame (max 10)
+            </div>
+            <input type="file" id="f2f-file" accept="image/*" multiple hidden />
+            <div class="form-row" style="margin-top:16px;">
+              <div>
+                <label>Prompt</label>
+                <textarea placeholder="Smooth transition between frames..."></textarea>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="rife">RIFE</option>
+                  <option value="film">FILM</option>
+                  <option value="flux-frame">Flux Frame</option>
+                  <option value="qwen-frame">Qwen Frame</option>
+                </select>
+              </div>
+              <div>
+                <label>FPS Output</label>
+                <select>
+                  <option>24 fps</option>
+                  <option>30 fps</option>
+                  <option>60 fps</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('f2f-output')">🎬 Generate</button>
+            <div class="output-area" id="f2f-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== TEXT TO VIDEO ========== -->
+        <div class="tool-page" id="page-text-to-video">
+          <h1 class="page-title">AI Text to Video</h1>
+          <p class="page-desc">Generate video dari teks/prompt</p>
+          <div class="card">
+            <div class="form-row">
+              <div>
+                <label>Prompt</label>
+                <textarea placeholder="A cinematic shot of a young man walking through a rainy Tokyo street at night..."></textarea>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="cogvideox">CogVideoX</option>
+                  <option value="hunyuan">HunyuanVideo</option>
+                  <option value="flux-video">Flux Video</option>
+                  <option value="qwen-video">Qwen Video</option>
+                  <option value="grok-video">Grok Video</option>
+                </select>
+              </div>
+              <div>
+                <label>Durasi</label>
+                <select>
+                  <option>5 detik</option>
+                  <option>10 detik</option>
+                  <option>15 detik</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('t2v-output')">🎬 Generate Video</button>
+            <div class="output-area" id="t2v-output" style="margin-top:16px;">Video akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== VIDEO TO VIDEO ========== -->
+        <div class="tool-page" id="page-video-to-video">
+          <h1 class="page-title">AI Video to Video</h1>
+          <p class="page-desc">Upload 2 video + prompt untuk transformasi</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Video 1</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('v2v-1').click()">📹 Video 1</div>
+                <input type="file" id="v2v-1" accept="video/*" hidden />
+              </div>
+              <div>
+                <label>Video 2</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('v2v-2').click()">📹 Video 2</div>
+                <input type="file" id="v2v-2" accept="video/*" hidden />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Prompt</label>
+                <textarea placeholder="Blend style of video 1 into video 2..."></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Model AI (Open Source)</label>
+                <select class="model-select">
+                  <option value="controlnet-video">ControlNet Video</option>
+                  <option value="flux-v2v">Flux Video2Video</option>
+                  <option value="qwen-v2v">Qwen Video2Video</option>
+                  <option value="animatediff">AnimateDiff</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('v2v-output')">✨ Generate</button>
+            <div class="output-area" id="v2v-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== REMOVE WATERMARK VIDEO ========== -->
+        <div class="tool-page" id="page-remove-watermark-vid">
+          <h1 class="page-title">Hapus Watermark Video</h1>
+          <p class="page-desc">Upload video yang ada watermark-nya</p>
+          <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('rw-vid-file').click()">
+              🎬 Upload video
+            </div>
+            <input type="file" id="rw-vid-file" accept="video/*" hidden />
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('rw-vid-output')">🧹 Hapus Watermark</button>
+            <div class="output-area" id="rw-vid-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== FACE SWAP IMAGE ========== -->
+        <div class="tool-page" id="page-face-swap-img">
+          <h1 class="page-title">AI Face Swap Image</h1>
+          <p class="page-desc">Single atau Multi face swap</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Source Face</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fs-src').click()">👤 Source</div>
+                <input type="file" id="fs-src" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Target Image</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fs-tgt').click()">🖼️ Target</div>
+                <input type="file" id="fs-tgt" accept="image/*" hidden />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Mode</label>
+                <select>
+                  <option>Single Face</option>
+                  <option>Multi Face</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('fs-img-output')">🔄 Swap Face</button>
+            <div class="output-area" id="fs-img-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== FACE SWAP VIDEO ========== -->
+        <div class="tool-page" id="page-face-swap-vid">
+          <h1 class="page-title">AI Face Swap Video</h1>
+          <p class="page-desc">Single atau Multi face swap pada video</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Source Face</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fsv-src').click()">👤 Source</div>
+                <input type="file" id="fsv-src" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Target Video</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fsv-tgt').click()">🎬 Video</div>
+                <input type="file" id="fsv-tgt" accept="video/*" hidden />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Mode</label>
+                <select>
+                  <option>Single Face</option>
+                  <option>Multi Face</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('fs-vid-output')">🔄 Swap Face</button>
+            <div class="output-area" id="fs-vid-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== FACE SWAP BATCH ========== -->
+        <div class="tool-page" id="page-face-swap-batch">
+          <h1 class="page-title">AI Face Swap Batch</h1>
+          <p class="page-desc">Proses hingga 50 gambar sekaligus</p>
+          <div class="card">
+            <div class="form-row">
+              <div>
+                <label>Source Face</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fsb-src').click()">👤 Source Face</div>
+                <input type="file" id="fsb-src" accept="image/*" hidden />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Target Images (max 50)</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('fsb-tgt').click()">🖼️ Upload banyak gambar</div>
+                <input type="file" id="fsb-tgt" accept="image/*" multiple hidden />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('fs-batch-output')">🔄 Batch Swap</button>
+            <div class="output-area" id="fs-batch-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== HEAD / BODY / STYLE / CLOTH SWAP ========== -->
+        <div class="tool-page" id="page-head-swap">
+          <h1 class="page-title">AI Head Swap</h1>
+          <p class="page-desc">Tukar kepala antara dua gambar</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Image A (Head Source)</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('hs-a').click()">🖼️ Image A</div>
+                <input type="file" id="hs-a" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Image B (Body Target)</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('hs-b').click()">🖼️ Image B</div>
+                <input type="file" id="hs-b" accept="image/*" hidden />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('head-output')">🔄 Head Swap</button>
+            <div class="output-area" id="head-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <div class="tool-page" id="page-body-swap">
+          <h1 class="page-title">AI Body Swap</h1>
+          <p class="page-desc">Tukar body antara dua gambar</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Image A</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('bs-a').click()">🖼️ Image A</div>
+                <input type="file" id="bs-a" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Image B</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('bs-b').click()">🖼️ Image B</div>
+                <input type="file" id="bs-b" accept="image/*" hidden />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('body-output')">🔄 Body Swap</button>
+            <div class="output-area" id="body-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <div class="tool-page" id="page-style-swap">
+          <h1 class="page-title">AI Style Swap</h1>
+          <p class="page-desc">Terapkan style dari gambar A ke gambar B</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Style Source</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('ss-a').click()">🎨 Style</div>
+                <input type="file" id="ss-a" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Content Image</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('ss-b').click()">🖼️ Content</div>
+                <input type="file" id="ss-b" accept="image/*" hidden />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('style-output')">✨ Style Transfer</button>
+            <div class="output-area" id="style-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <div class="tool-page" id="page-cloth-swap">
+          <h1 class="page-title">AI Cloth Swap</h1>
+          <p class="page-desc">Tukar pakaian antara dua gambar</p>
+          <div class="card">
+            <div class="form-row two">
+              <div>
+                <label>Cloth Source</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('cs-a').click()">👕 Cloth</div>
+                <input type="file" id="cs-a" accept="image/*" hidden />
+              </div>
+              <div>
+                <label>Person Image</label>
+                <div class="upload-zone" style="padding:20px;" onclick="document.getElementById('cs-b').click()">👤 Person</div>
+                <input type="file" id="cs-b" accept="image/*" hidden />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="mockGenerate('cloth-output')">👕 Cloth Swap</button>
+            <div class="output-area" id="cloth-output" style="margin-top:16px;">Hasil akan muncul di sini...</div>
+          </div>
+        </div>
+
+        <!-- ========== PROJECTS ========== -->
+        <div class="tool-page" id="page-projects">
+          <h1 class="page-title">Proyek Saya</h1>
+          <p class="page-desc">Daftar proyek yang sudah disimpan (disimpan di browser Anda)</p>
+          <div class="card">
+            <div class="project-list" id="project-list">
+              <div style="text-align:center;color:var(--text-muted);padding:30px;">
+                Belum ada proyek tersimpan.<br>
+                <small>Generate & simpan dari Novel to Comic untuk melihat di sini.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== MASUKAN ========== -->
+        <div class="tool-page" id="page-masukan">
+          <h1 class="page-title">Masukan & Saran</h1>
+          <p class="page-desc">Bantu kami mengembangkan Smartrerinstudio menjadi lebih baik</p>
+          <div class="card feedback-box">
+            <div class="form-row">
+              <div>
+                <label>Nama (opsional)</label>
+                <input type="text" id="feedback-name" placeholder="Nama atau username" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Jenis Masukan</label>
+                <select id="feedback-type">
+                  <option>Saran Fitur</option>
+                  <option>Laporan Bug</option>
+                  <option>Kritik & Saran</option>
+                  <option>Permintaan Integrasi API</option>
+                  <option>Lainnya</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Pesan</label>
+                <textarea id="feedback-msg" placeholder="Tulis masukan, saran, atau laporan bug di sini..."></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="submitFeedback()">Kirim Masukan</button>
+            <div id="feedback-success" style="display:none;margin-top:14px;color:var(--success);font-size:14px;text-align:center;">
+              ✅ Terima kasih! Masukan kamu sudah dicatat (disimpan di browser untuk demo).
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          Smartrerinstudio • Andromeda Edition • Demo Frontend<br>
+          Konten NSFW hanya tersedia setelah verifikasi umur 18+
+        </div>
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-item active" data-page="beranda" onclick="showPage('beranda')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Beranda
+      </div>
+      <div class="bottom-nav-item" data-page="novel-to-comic" onclick="showPage('novel-to-comic')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Novel
+      </div>
+      <div class="bottom-nav-item" data-page="text-to-image" onclick="showPage('text-to-image')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Image
+      </div>
+      <div class="bottom-nav-item" data-page="image-to-video" onclick="showPage('image-to-video')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Video
+      </div>
+      <div class="bottom-nav-item" data-page="face-swap-img" onclick="showPage('face-swap-img')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        Swap
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    // ========== STATE ==========
+    let isAdult = false;
+    let nsfwUnlocked = false;
+    let captchaAnswer = 0;
+
+    // ========== INIT ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fill years
+      const yearSelects = [document.getElementById('birth-year'), document.getElementById('nsfw-year')];
+      const currentYear = new Date().getFullYear();
+      yearSelects.forEach(sel => {
+        for (let y = currentYear - 13; y >= 1940; y--) {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.textContent = y;
+          sel.appendChild(opt);
+        }
+      });
+
+      // Check existing verification
+      const saved = localStorage.getItem('smartrer_verified');
+      if (saved) {
+        const data = JSON.parse(saved);
+        isAdult = data.isAdult;
+        nsfwUnlocked = data.nsfwUnlocked || false;
+        enterApp();
+      }
+
+      // Bot check toggle
+      document.getElementById('bot-check').addEventListener('change', function() {
+        const box = document.getElementById('captcha-box');
+        if (this.checked) {
+          box.classList.add('active');
+          generateCaptcha();
+        } else {
+          box.classList.remove('active');
+        }
+        checkGateReady();
+      });
+
+      document.getElementById('birth-month').addEventListener('change', checkGateReady);
+      document.getElementById('birth-year').addEventListener('change', checkGateReady);
+      document.getElementById('captcha-answer').addEventListener('input', checkGateReady);
+
+      // Char count
+      document.getElementById('novel-text').addEventListener('input', function() {
+        document.getElementById('char-count').textContent = this.value.length;
+      });
+
+      // Style selector
+      document.querySelectorAll('.style-item').forEach(el => {
+        el.addEventListener('click', function() {
+          document.querySelectorAll('.style-item').forEach(s => s.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Char selector
+      document.querySelectorAll('.char-item[data-char]').forEach(el => {
+        el.addEventListener('click', function() {
+          document.querySelectorAll('.char-item').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    });
+
+    function generateCaptcha() {
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      captchaAnswer = a + b;
+      document.getElementById('captcha-question').textContent = `Berapa ${a} + ${b}?`;
+      document.getElementById('captcha-answer').value = '';
+    }
+
+    function checkGateReady() {
+      const month = document.getElementById('birth-month').value;
+      const year = document.getElementById('birth-year').value;
+      const botChecked = document.getElementById('bot-check').checked;
+      const answer = document.getElementById('captcha-answer').value;
+      const btn = document.getElementById('gate-submit');
+
+      btn.disabled = !(month && year && botChecked && answer);
+    }
+
+    document.getElementById('gate-submit').addEventListener('click', () => {
+      const month = parseInt(document.getElementById('birth-month').value);
+      const year = parseInt(document.getElementById('birth-year').value);
+      const answer = parseInt(document.getElementById('captcha-answer').value);
+      const errorEl = document.getElementById('gate-error');
+
+      if (answer !== captchaAnswer) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = 'Jawaban verifikasi bot salah. Coba lagi.';
+        generateCaptcha();
+        return;
+      }
+
+      const today = new Date();
+      let age = today.getFullYear() - year;
+      if (today.getMonth() + 1 < month) age--;
+
+      isAdult = age >= 18;
+      nsfwUnlocked = isAdult; // auto unlock if 18+
+
+      localStorage.setItem('smartrer_verified', JSON.stringify({
+        isAdult,
+        nsfwUnlocked,
+        birthMonth: month,
+        birthYear: year,
+        verifiedAt: Date.now()
+      }));
+
+      if (!isAdult) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = 'Anda berusia di bawah 18 tahun. Fitur NSFW akan tetap terkunci.';
+        setTimeout(() => enterApp(), 1500);
+      } else {
+        enterApp();
+      }
+    });
+
+    function enterApp() {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      updateNsfwUI();
+    }
+
+    function updateNsfwUI() {
+      const badge = document.getElementById('nsfw-badge');
+      if (nsfwUnlocked) {
+        badge.textContent = 'NSFW Unlocked';
+        badge.classList.remove('locked');
+        badge.classList.add('unlocked');
+        // Show NSFW toggle rows
+        document.querySelectorAll('[id$="-row"]').forEach(el => {
+          if (el.id.includes('nsfw')) el.style.display = 'flex';
+        });
+        const nsfwOpt = document.getElementById('nsfw-option-row');
+        if (nsfwOpt) nsfwOpt.style.display = 'flex';
+        // Show NSFW models in all selects
+        document.querySelectorAll('.nsfw-model').forEach(opt => {
+          opt.style.display = '';
+        });
+      } else {
+        badge.textContent = 'NSFW Locked';
+        badge.classList.remove('unlocked');
+        badge.classList.add('locked');
+        // Hide NSFW models
+        document.querySelectorAll('.nsfw-model').forEach(opt => {
+          opt.style.display = 'none';
+          // If currently selected NSFW model, reset to first safe option
+          const select = opt.closest('select');
+          if (select && select.value === opt.value) {
+            select.selectedIndex = 0;
+          }
+        });
+      }
+    }
+
+    // ========== NSFW MODAL ==========
+    function openNsfwModal() {
+      document.getElementById('nsfw-modal').classList.add('active');
+    }
+
+    function closeNsfwModal() {
+      document.getElementById('nsfw-modal').classList.remove('active');
+      document.getElementById('nsfw-error').style.display = 'none';
+    }
+
+    document.getElementById('nsfw-unlock-btn').addEventListener('click', () => {
+      const month = parseInt(document.getElementById('nsfw-month').value);
+      const year = parseInt(document.getElementById('nsfw-year').value);
+      const errorEl = document.getElementById('nsfw-error');
+
+      if (!month || !year) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = 'Harap isi bulan dan tahun lahir.';
+        return;
+      }
+
+      const today = new Date();
+      let age = today.getFullYear() - year;
+      if (today.getMonth() + 1 < month) age--;
+
+      if (age < 18) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = 'Usia Anda kurang dari 18 tahun. Fitur NSFW tidak dapat dibuka.';
+        return;
+      }
+
+      nsfwUnlocked = true;
+      isAdult = true;
+      const saved = JSON.parse(localStorage.getItem('smartrer_verified') || '{}');
+      saved.nsfwUnlocked = true;
+      saved.isAdult = true;
+      localStorage.setItem('smartrer_verified', JSON.stringify(saved));
+
+      updateNsfwUI();
+      closeNsfwModal();
+      alert('Fitur NSFW berhasil dibuka!');
+    });
+
+    // ========== NAVIGATION ==========
+    function showPage(pageId) {
+      document.querySelectorAll('.tool-page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + pageId).classList.add('active');
+
+      // Update sidebar
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll(`.nav-item[data-page="${pageId}"]`).forEach(n => n.classList.add('active'));
+
+      // Update bottom nav
+      document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+      const bottomItem = document.querySelector(`.bottom-nav-item[data-page="${pageId}"]`);
+      if (bottomItem) bottomItem.classList.add('active');
+    }
+
+    // ========== REAL GENERATE via Pollinations (Free) ==========
+    // Docs: https://image.pollinations.ai/prompt/{prompt}?model=flux
+    function getSelectedModel(selectId) {
+      const sel = document.getElementById(selectId) || document.querySelector('.model-select');
+      if (!sel) return 'flux';
+      const val = sel.value || 'flux';
+      // Map our internal names to Pollinations model names
+      const map = {
+        'flux': 'flux',
+        'flux-uncensored': 'flux',
+        'qwen': 'flux',
+        'qwen-nsfw': 'flux',
+        'grok-imagine': 'flux',
+        'gemini': 'flux',
+        'banana': 'flux',
+        'sdxl': 'flux',
+        'pony': 'flux',
+        'anything': 'flux',
+        'autismmix': 'flux'
+      };
+      return map[val] || 'flux';
+    }
+
+    function buildPollinationsUrl(prompt, model = 'flux', width = 768, height = 1024) {
+      const clean = encodeURIComponent(prompt.trim().slice(0, 300));
+      // nologo=true removes watermark on some tiers; seed for variety
+      const seed = Math.floor(Math.random() * 999999);
+      return `https://image.pollinations.ai/prompt/${clean}?model=${model}&width=${width}&height=${height}&nologo=true&seed=${seed}&enhance=true`;
+    }
+
+    function mockGenerate(outputId) {
+      // For tools that still need full backend (video, face swap, etc.)
+      const el = document.getElementById(outputId);
+      el.innerHTML = '⏳ Sedang memproses...';
+      setTimeout(() => {
+        el.innerHTML = `⚠️ Fitur ini masih butuh server lokal / API berbayar.<br><br>
+          <small style="opacity:0.8;">
+          • Text-to-Image & Novel to Comic sudah pakai <b>Pollinations (gratis)</b><br>
+          • Video / Face Swap / Batch butuh ComfyUI lokal atau API berbayar<br>
+          • Lihat panduan lokal di README
+          </small>`;
+      }, 1200);
+    }
+
+    async function generateRealImage(prompt, outputId, model = 'flux') {
+      const el = document.getElementById(outputId);
+      if (!prompt || prompt.trim().length < 3) {
+        el.innerHTML = '⚠️ Prompt terlalu pendek.';
+        return;
+      }
+      el.innerHTML = '⏳ Menggenerate gambar via Pollinations (gratis)...<br><small>Bisa 10–30 detik tergantung antrian</small>';
+
+      const url = buildPollinationsUrl(prompt, model);
+      // Preload image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        el.innerHTML = `
+          <img src="${url}" alt="Generated" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4);" />
+          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">
+            Generated dengan Pollinations • Model: ${model}<br>
+            <a href="${url}" target="_blank" style="color:var(--accent);">Buka full size</a>
+          </div>`;
+      };
+      img.onerror = () => {
+        el.innerHTML = `❌ Gagal generate (rate limit atau server sibuk).<br>
+          <small>Coba lagi dalam 15–20 detik. Pollinations gratis punya rate limit.</small>
+          <br><br>
+          <button class="btn btn-secondary" onclick="generateRealImage(\`${prompt.replace(/`/g,'')}\`, '${outputId}', '${model}')">Coba Lagi</button>`;
+      };
+      img.src = url;
+    }
+
+    // Text-to-Image real generate
+    function generateTextToImage() {
+      const prompt = document.getElementById('tti-prompt')?.value || '';
+      const model = getSelectedModel();
+      generateRealImage(prompt, 'tti-output', model);
+    }
+
+    // Novel to Comic – generate several panels from novel text
+    async function generateComic() {
+      const progress = document.getElementById('comic-progress');
+      const fill = document.getElementById('comic-progress-fill');
+      const text = document.getElementById('comic-progress-text');
+      const output = document.getElementById('comic-output');
+      const novelText = document.getElementById('novel-text')?.value || '';
+      const title = document.getElementById('novel-title')?.value || 'Untitled';
+      const style = document.querySelector('.style-item.active')?.dataset.style || 'anime';
+      const model = getSelectedModel('comic-model');
+
+      if (!novelText || novelText.trim().length < 20) {
+        output.innerHTML = '⚠️ Masukkan minimal beberapa kalimat novel dulu.';
+        return;
+      }
+
+      progress.style.display = 'block';
+      output.innerHTML = '';
+      fill.style.width = '10%';
+      text.textContent = 'Menyiapkan panel...';
+
+      // Simple scene extraction (first few sentences + style)
+      const sentences = novelText.split(/[.!?]+/).filter(s => s.trim().length > 15).slice(0, 4);
+      const stylePrompt = {
+        anime: 'anime style, detailed anime illustration, vibrant colors',
+        realistic: 'photorealistic, hyperrealistic, cinematic lighting',
+        manhwa: 'manhwa style, korean webtoon, clean lines',
+        manga: 'manga style, black and white, screentone',
+        webtoon: 'webtoon style, vertical comic, colorful',
+        custom: 'high quality illustration'
+      }[style] || 'anime style';
+
+      const panels = [];
+      for (let i = 0; i < Math.min(4, sentences.length || 1); i++) {
+        const scene = sentences[i] ? sentences[i].trim().slice(0, 120) : title;
+        const prompt = `${stylePrompt}, comic panel, ${scene}, masterpiece, best quality`;
+        const url = buildPollinationsUrl(prompt, model, 512, 768);
+        panels.push({ url, scene });
+        fill.style.width = `${20 + (i + 1) * 18}%`;
+        text.textContent = `Generate panel ${i + 1}...`;
+        // Small delay to respect rate limit
+        await new Promise(r => setTimeout(r, 1600));
+      }
+
+      fill.style.width = '100%';
+      text.textContent = 'Selesai!';
+
+      output.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          ${panels.map((p, idx) => `
+            <div style="background:var(--bg-primary);border-radius:10px;overflow:hidden;border:1px solid var(--border);">
+              <img src="${p.url}" alt="Panel ${idx+1}" style="width:100%;display:block;" loading="lazy" />
+              <div style="padding:8px;font-size:11px;color:var(--text-muted);">${p.scene.slice(0,60)}...</div>
+            </div>
+          `).join('')}
+        </div>
+        <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">
+          Generated via <b>Pollinations.ai</b> (gratis) • Style: ${style} • Model: ${model}<br>
+          Rate limit berlaku. Untuk kualitas & kecepatan lebih tinggi + uncensored penuh → pakai ComfyUI lokal.
+        </p>`;
+
+      setTimeout(() => progress.style.display = 'none', 600);
+    }
+
+    function saveProject() {
+      const title = document.getElementById('novel-title').value || 'Tanpa Judul';
+      const projects = JSON.parse(localStorage.getItem('smartrer_projects') || '[]');
+      projects.unshift({
+        id: Date.now(),
+        title,
+        date: new Date().toLocaleDateString('id-ID'),
+        type: 'Novel to Comic'
+      });
+      localStorage.setItem('smartrer_projects', JSON.stringify(projects.slice(0, 20)));
+      alert('Proyek disimpan!');
+      renderProjects();
+    }
+
+    function renderProjects() {
+      const list = document.getElementById('project-list');
+      const projects = JSON.parse(localStorage.getItem('smartrer_projects') || '[]');
+      if (projects.length === 0) {
+        list.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:30px;">
+          Belum ada proyek tersimpan.<br><small>Generate & simpan dari Novel to Comic untuk melihat di sini.</small></div>`;
+        return;
+      }
+      list.innerHTML = projects.map(p => `
+        <div class="project-item">
+          <div class="project-thumb">📖</div>
+          <div class="project-info">
+            <div class="project-title">${p.title}</div>
+            <div class="project-meta">${p.type} • ${p.date}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function previewImages(input, previewId) {
+      const preview = document.getElementById(previewId);
+      const files = Array.from(input.files).slice(0, 4);
+      preview.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'upload-slot';
+        if (files[i]) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(files[i]);
+          slot.appendChild(img);
+        } else {
+          slot.textContent = i + 1;
+        }
+        preview.appendChild(slot);
+      }
+    }
+
+    // Initial projects render when page shown
+    document.querySelector('[data-page="projects"]')?.addEventListener('click', renderProjects);
+
+    // ========== HERO SLIDESHOW ==========
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.hero-slide');
+    const dotsContainer = document.getElementById('hero-dots');
+
+    if (slides.length && dotsContainer) {
+      slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+      });
+
+      function goToSlide(idx) {
+        slides[currentSlide].classList.remove('active');
+        dotsContainer.children[currentSlide].classList.remove('active');
+        currentSlide = idx;
+        slides[currentSlide].classList.add('active');
+        dotsContainer.children[currentSlide].classList.add('active');
+      }
+
+      setInterval(() => {
+        goToSlide((currentSlide + 1) % slides.length);
+      }, 4000);
+    }
+
+    // ========== AI ASSISTANT (simple mock) ==========
+    const assistantReplies = [
+      "Untuk Novel to Comic, pastikan teks novel tidak terlalu panjang di awal. Mulai dari 1-2 chapter dulu ya.",
+      "Tips prompt bagus: sebutkan gaya (anime/realistic), pencahayaan, dan ekspresi karakter agar hasil lebih konsisten.",
+      "Fitur NSFW bisa dibuka lewat ikon gembok di header setelah verifikasi umur 18+.",
+      "Saat ini masih mode demo. Integrasi API AI sungguhan bisa ditambahkan nanti (Stable Diffusion, Runway, dll).",
+      "Kamu bisa simpan proyek dari halaman Novel to Comic, lalu lihat di menu Proyek Saya.",
+      "Untuk Face Swap Batch, maksimal 50 gambar. Pastikan resolusi tidak terlalu besar agar lebih cepat.",
+      "Ada yang lain yang ingin ditanyakan?"
+    ];
+
+    function sendAssistant() {
+      const input = document.getElementById('assistant-input');
+      const body = document.getElementById('assistant-body');
+      const text = input.value.trim();
+      if (!text) return;
+
+      body.innerHTML += `<div class="assistant-msg user">${text}</div>`;
+      input.value = '';
+
+      setTimeout(() => {
+        const reply = assistantReplies[Math.floor(Math.random() * assistantReplies.length)];
+        body.innerHTML += `<div class="assistant-msg bot">${reply}</div>`;
+        body.scrollTop = body.scrollHeight;
+      }, 600);
+    }
+
+    // ========== FEEDBACK ==========
+    function submitFeedback() {
+      const msg = document.getElementById('feedback-msg').value.trim();
+      if (!msg) {
+        alert('Pesan tidak boleh kosong');
+        return;
+      }
+      const feedbacks = JSON.parse(localStorage.getItem('smartrer_feedbacks') || '[]');
+      feedbacks.push({
+        name: document.getElementById('feedback-name').value || 'Anonim',
+        type: document.getElementById('feedback-type').value,
+        msg,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('smartrer_feedbacks', JSON.stringify(feedbacks));
+      document.getElementById('feedback-success').style.display = 'block';
+      document.getElementById('feedback-msg').value = '';
+      setTimeout(() => {
+        document.getElementById('feedback-success').style.display = 'none';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
