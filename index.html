@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SmartRerinStudio - AI Creative Suite</title>
   <style>
     :root {
@@ -18,112 +18,101 @@
       --success: #55efc4;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 70px; }
 
-    /* Gate / Verification Overlay */
-    #gate { position: fixed; inset: 0; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .gate-card { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 16px; width: 100%; max-width: 420px; text-align: center; }
-    .gate-card h2 { color: var(--accent); margin-bottom: 8px; }
-    .gate-card p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+    #app { flex: 1; display: flex; flex-direction: column; }
+    .navbar { height: 65px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 20px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; }
 
-    .form-group { margin-bottom: 16px; text-align: left; }
-    .form-group label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
-    select, input, textarea { width: 100%; padding: 12px; background: #0f1220; border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; font-size: 14px; }
-    select:focus, input:focus, textarea:focus { border-color: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
 
-    .btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; background: var(--card-bg); color: var(--text); }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-full { width: 100%; }
+    /* Navigasi Atas khusus Laptop/Desktop */
+    .desktop-nav { display: none; gap: 12px; }
+    .desktop-nav-item { padding: 8px 16px; border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+    .desktop-nav-item.active, .desktop-nav-item:hover { background: var(--primary); color: white; }
 
-    .error-msg { color: var(--danger); font-size: 12px; margin-top: 6px; display: none; }
+    .icon-btn { background: #0f1220; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+    .icon-btn:hover { border-color: var(--primary); }
 
-    #app { display: none; flex: 1; }
-    .navbar { height: 60px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 100; }
-    .logo { font-size: 18px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-
-    .nsfw-badge { background: #331520; color: var(--danger); border: 1px solid var(--danger); font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; }
-    .nsfw-badge.unlocked { background: #132a24; color: var(--success); border-color: var(--success); }
-
-    .main-content { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .main-content { max-width: 1000px; width: 100%; margin: 0 auto; padding: 24px 16px; }
     .tool-page { display: none; }
     .tool-page.active { display: block; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--accent); }
-    .output-box { min-height: 140px; background: #0f1220; border: 1px dashed var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-align: center; margin-top: 16px; word-break: break-word; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .card-title { font-size: 18px; font-weight: 600; margin-bottom: 14px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .output-box { min-height: 160px; background: #0f1220; border: 1px dashed var(--border); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-align: center; margin-top: 18px; word-break: break-word; font-size: 15px; }
 
-    /* Bottom Nav Bar */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 11px; cursor: pointer; text-decoration: none; }
-    .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 2px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 14px; color: var(--text-dim); margin-bottom: 6px; font-weight: 500; }
+    select, input, textarea { width: 100%; padding: 14px; background: #0f1220; border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; font-size: 15px; }
+    select:focus, input:focus, textarea:focus { border-color: var(--primary); }
+
+    .btn { padding: 14px 22px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; background: var(--card-bg); color: var(--text); font-size: 15px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-full { width: 100%; }
+
+    /* Toggle Switch Component */
+    .toggle-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #252a44; transition: .3s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* Bottom Nav Mobile */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 11px; cursor: pointer; text-decoration: none; width: 20%; text-align: center; }
+    .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 3px; }
     .bottom-nav-item.active { color: var(--accent); font-weight: 600; }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+    @media (min-width: 768px) {
+      body { padding-bottom: 0; }
+      .bottom-nav { display: none; }
+      .desktop-nav { display: flex; }
+      .main-content { padding: 40px 24px; }
+    }
+
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
     .modal-overlay.active { display: flex; }
-    .modal { background: var(--card-bg); border: 1px solid var(--border); padding: 24px; border-radius: 12px; max-width: 360px; width: 100%; text-align: center; }
+    .modal { background: var(--card-bg); border: 1px solid var(--border); padding: 24px; border-radius: 14px; max-width: 420px; width: 100%; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 600; color: var(--accent); }
+    .close-btn { cursor: pointer; color: var(--text-dim); font-size: 20px; }
+    .account-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
   </style>
 </head>
 <body>
 
-  <!-- Age Gate & Bot Check -->
-  <div id="gate">
-    <div class="gate-card">
-      <h2>🌌 SmartRerinStudio</h2>
-      <p>Verifikasi usia untuk mengaktifkan seluruh fitur AI.</p>
-      
-      <div class="form-group">
-        <label>Bulan Lahir</label>
-        <select id="birth-month">
-          <option value="">-- Pilih Bulan --</option>
-          <option value="1">Januari</option><option value="2">Februari</option>
-          <option value="3">Maret</option><option value="4">April</option>
-          <option value="5">Mei</option><option value="6">Juni</option>
-          <option value="7">Juli</option><option value="8">Agustus</option>
-          <option value="9">September</option><option value="10">Oktober</option>
-          <option value="11">November</option><option value="12">Desember</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Tahun Lahir</label>
-        <select id="birth-year"><option value="">-- Pilih Tahun --</option></select>
-      </div>
-
-      <div class="form-group">
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input type="checkbox" id="bot-check" style="width:auto;"> Saya bukan robot
-        </label>
-      </div>
-
-      <div id="captcha-box" class="form-group" style="display:none; background:#0f1220; padding:12px; border-radius:8px;">
-        <label>Berapa 7 + 5 ?</label>
-        <input type="number" id="captcha-answer" placeholder="Jawaban...">
-      </div>
-
-      <div id="gate-error" class="error-msg"></div>
-      <button id="gate-submit" class="btn btn-primary btn-full" style="margin-top:10px;" disabled>Masuk Studio</button>
-    </div>
-  </div>
-
-  <!-- Main App -->
   <div id="app">
     <header class="navbar">
       <div class="logo">🌌 SmartRerinStudio</div>
-      <span id="nsfw-badge" class="nsfw-badge" onclick="openNsfwModal()">🔒 NSFW Safe</span>
+
+      <nav class="desktop-nav">
+        <div class="desktop-nav-item active" data-page="beranda" onclick="showPage('beranda')">Beranda</div>
+        <div class="desktop-nav-item" data-page="novel" onclick="showPage('novel')">Novel</div>
+        <div class="desktop-nav-item" data-page="image" onclick="showPage('image')">Image</div>
+        <div class="desktop-nav-item" data-page="video" onclick="showPage('video')">Video</div>
+        <div class="desktop-nav-item" data-page="swap" onclick="showPage('swap')">Swap</div>
+      </nav>
+
+      <div class="nav-right">
+        <button class="icon-btn" onclick="openModal('account-modal')">👤 Akun</button>
+        <button class="icon-btn" onclick="openModal('settings-modal')">⚙️ Pengaturan</button>
+      </div>
     </header>
 
     <main class="main-content">
-
       <!-- 1. Beranda -->
       <section id="page-beranda" class="tool-page active">
         <div class="card">
           <div class="card-title">🤖 Asisten Kreatif & Generator Ide</div>
-          <p style="color:var(--text-dim); font-size:13px; margin-bottom:12px;">Masukkan ide dasar naskah atau konsep visual Anda:</p>
-          <textarea id="assistant-input" rows="3" placeholder="Contoh: Buatkan konsep karakter pendekar es bergaun modern..."></textarea>
-          <button class="btn btn-primary btn-full" style="margin-top:10px;" onclick="processAssistant()">Proses Ide CERITA</button>
+          <p style="color:var(--text-dim); font-size:14px; margin-bottom:14px;">Masukkan ide dasar naskah atau konsep visual Anda:</p>
+          <textarea id="assistant-input" rows="4" placeholder="Contoh: Buatkan konsep karakter pendekar es bergaun modern..."></textarea>
+          <button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="processAssistant()">Proses Ide CERITA</button>
           <div id="assistant-output" class="output-box">Hasil racikan ide akan tampil di sini.</div>
         </div>
       </section>
@@ -163,7 +152,7 @@
             <select id="tti-model">
               <option value="flux">Flux Standard</option>
               <option value="turbo">Turbo Speed</option>
-              <option class="nsfw-model" value="flux-uncensored" style="display:none;">Flux Uncensored (NSFW)</option>
+              <option class="nsfw-model" value="flux-uncensored" style="display:none;">Flux Uncensored (NSFW Mode Active)</option>
             </select>
           </div>
           <button class="btn btn-primary btn-full" onclick="generateImage()">Generate Gambar</button>
@@ -184,7 +173,7 @@
         </div>
       </section>
 
-      <!-- 5. Swap & Crafting Tools -->
+      <!-- 5. Swap Concept -->
       <section id="page-swap" class="tool-page">
         <div class="card">
           <div class="card-title">🎭 Concept & Crafting Assistant</div>
@@ -196,240 +185,150 @@
           <div id="swap-output" class="output-box">Prompt panduan visual akan tampil di sini.</div>
         </div>
       </section>
-
     </main>
 
-    <!-- Modal NSFW -->
-    <div id="nsfw-modal" class="modal-overlay">
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="modal-overlay">
       <div class="modal">
-        <h3>🔓 Unlock NSFW Content</h3>
-        <p style="color:var(--text-dim); font-size:13px; margin: 10px 0;">Konfirmasi ulang tahun lahir Anda (Harus $\ge 18$ tahun).</p>
-        <div class="form-group">
-          <select id="nsfw-year"><option value="">-- Pilih Tahun --</option></select>
+        <div class="modal-header">
+          <div class="modal-title">⚙️ Pengaturan Studio</div>
+          <div class="close-btn" onclick="closeModal('settings-modal')">✕</div>
         </div>
-        <div id="nsfw-error" class="error-msg"></div>
-        <div style="display:flex; gap:8px; margin-top:16px;">
-          <button class="btn" style="flex:1;" onclick="closeNsfwModal()">Batal</button>
-          <button id="nsfw-unlock-btn" class="btn btn-primary" style="flex:1;">Buka Akses</button>
+        <div class="toggle-container">
+          <div>
+            <div style="font-weight: 600; font-size: 15px;">Fitur NSFW Unlocked</div>
+            <div style="font-size: 12px; color: var(--text-dim);" id="nsfw-status-text">Buka opsi uncensored di alat AI.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="nsfw-toggle" onchange="toggleNSFW(this.checked)">
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
     </div>
+
+    <!-- Modal Akun -->
+    <div id="account-modal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">👤 Menu Akun</div>
+          <div class="close-btn" onclick="closeModal('account-modal')">✕</div>
+        </div>
+        <div class="account-actions">
+          <button class="btn" onclick="dummyAction('Profil Saya')">📄 Profil Saya</button>
+          <button class="btn btn-primary" onclick="dummyAction('Sign In')">🔑 Sign In</button>
+          <button class="btn" style="border:1px solid var(--primary);" onclick="dummyAction('Sign Up')">📝 Sign Up</button>
+          <button class="btn" style="color:var(--danger); border:1px solid var(--danger);" onclick="dummyAction('Sign Out')">🚪 Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-item active" data-page="beranda" onclick="showPage('beranda')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Beranda</span>
+      </div>
+      <div class="bottom-nav-item" data-page="novel" onclick="showPage('novel')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Novel</span>
+      </div>
+      <div class="bottom-nav-item" data-page="image" onclick="showPage('image')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Image</span>
+      </div>
+      <div class="bottom-nav-item" data-page="video" onclick="showPage('video')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <span>Video</span>
+      </div>
+      <div class="bottom-nav-item" data-page="swap" onclick="showPage('swap')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Swap</span>
+      </div>
+    </nav>
   </div>
 
-  <!-- Navigation Bar Bawah -->
-  <nav class="bottom-nav">
-    <div class="bottom-nav-item active" data-page="beranda" onclick="showPage('beranda')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Beranda</span>
-    </div>
-    <div class="bottom-nav-item" data-page="novel" onclick="showPage('novel')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span>Novel</span>
-    </div>
-    <div class="bottom-nav-item" data-page="image" onclick="showPage('image')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Image</span>
-    </div>
-    <div class="bottom-nav-item" data-page="video" onclick="showPage('video')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-      <span>Video</span>
-    </div>
-    <div class="bottom-nav-item" data-page="swap" onclick="showPage('swap')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span>Swap</span>
-    </div>
-  </nav>
-
-  <!-- JavaScript Logika & Aktifasi Fitur -->
   <script>
-    const currentYear = new Date().getFullYear();
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    // Inisialisasi Tahun
-    [document.getElementById('birth-year'), document.getElementById('nsfw-year')].forEach(select => {
-      if(!select) return;
-      for (let y = currentYear; y >= 1940; y--) {
-        const opt = document.createElement('option');
-        opt.value = y;
-        opt.textContent = y;
-        select.appendChild(opt);
+    function toggleNSFW(enabled) {
+      document.querySelectorAll('.nsfw-model').forEach(el => {
+        el.style.display = enabled ? 'block' : 'none';
+      });
+      const statusText = document.getElementById('nsfw-status-text');
+      if (statusText) {
+        statusText.textContent = enabled ? 'Mode NSFW aktif di seluruh alat AI.' : 'Buka opsi uncensored di alat AI.';
       }
-    });
-
-    // Bot Verification
-    document.getElementById('bot-check').addEventListener('change', function() {
-      const captchaBox = document.getElementById('captcha-box');
-      const gateSubmit = document.getElementById('gate-submit');
-      if(this.checked) {
-        captchaBox.style.display = 'block';
-        gateSubmit.disabled = false;
-      } else {
-        captchaBox.style.display = 'none';
-        gateSubmit.disabled = true;
-      }
-    });
-
-    // Gate Submit
-    document.getElementById('gate-submit').addEventListener('click', () => {
-      const month = document.getElementById('birth-month').value;
-      const year = document.getElementById('birth-year').value;
-      const captchaAns = document.getElementById('captcha-answer').value;
-
-      if (!month || !year) return showError('gate-error', 'Pilih bulan dan tahun lahir.');
-      if (captchaAns !== '12') return showError('gate-error', 'Jawaban 7 + 5 salah.');
-
-      if ((currentYear - parseInt(year)) >= 18) enableNSFW();
-
-      document.getElementById('gate').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-    });
-
-    function showError(id, msg) {
-      const el = document.getElementById(id);
-      el.textContent = msg;
-      el.style.display = 'block';
     }
 
-    // Modal NSFW
-    function openNsfwModal() { document.getElementById('nsfw-modal').classList.add('active'); }
-    function closeNsfwModal() { document.getElementById('nsfw-modal').classList.remove('active'); }
-
-    document.getElementById('nsfw-unlock-btn').addEventListener('click', () => {
-      const year = document.getElementById('nsfw-year').value;
-      if (!year) return showError('nsfw-error', 'Pilih tahun lahir.');
-      if ((currentYear - parseInt(year)) >= 18) {
-        enableNSFW();
-        closeNsfwModal();
-        alert('Fitur NSFW / Uncensored Berhasil Aktif!');
-      } else {
-        showError('nsfw-error', 'Belum berusia 18 tahun.');
-      }
-    });
-
-    function enableNSFW() {
-      const badge = document.getElementById('nsfw-badge');
-      badge.textContent = '🔓 NSFW Unlocked';
-      badge.className = 'nsfw-badge unlocked';
-      document.querySelectorAll('.nsfw-model').forEach(el => el.style.display = 'block');
+    function dummyAction(name) {
+      alert(`Fitur [${name}] siap dihubungkan ke sistem database/autentikasi.`);
     }
 
-    // Navigasi
     function showPage(pageId) {
       document.querySelectorAll('.tool-page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-item, .desktop-nav-item').forEach(n => n.classList.remove('active'));
 
       const target = document.getElementById('page-' + pageId);
       if (target) target.classList.add('active');
       
-      const navItem = document.querySelector(`.bottom-nav-item[data-page="${pageId}"]`);
-      if (navItem) navItem.classList.add('active');
+      document.querySelectorAll(`[data-page="${pageId}"]`).forEach(el => el.classList.add('active'));
       window.scrollTo(0, 0);
     }
 
-    // 1. FITUR ASISTEN KREATIF
     function processAssistant() {
       const input = document.getElementById('assistant-input').value;
       const output = document.getElementById('assistant-output');
       if(!input.trim()) return alert('Masukkan naskah/ide!');
-
       output.innerHTML = '⏳ Meracik naskah & struktur ide...';
       setTimeout(() => {
-        output.innerHTML = `
-          <div style="text-align:left; width:100%;">
-            <b style="color:var(--accent);">✨ Ringkasan Konsep Cerita:</b><br>
-            • <b>Fokus Utama:</b> ${input}<br>
-            • <b>Rekomendasi Visual:</b> Ultra-detailed 8k, dramatic lighting, cinematic camera composition.<br>
-            • <b>Status:</b> Siap diproses di menu Novel / Image.
-          </div>
-        `;
-      }, 1000);
+        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">✨ Ringkasan Konsep Cerita:</b><br>• <b>Fokus Utama:</b> ${input}<br>• <b>Rekomendasi Visual:</b> Ultra-detailed 8k, cinematic composition.</div>`;
+      }, 800);
     }
 
-    // 2. FITUR NOVEL TO COMIC (API INTEGRATION)
     function generateComic() {
       const text = document.getElementById('novel-input-text').value;
       const style = document.getElementById('comic-style').value;
       const output = document.getElementById('comic-output');
-
       if (!text.trim()) return alert('Tempel naskah novel dulu!');
-
-      output.innerHTML = '⏳ Mengolah naskah menjadi panel komik visual...';
+      output.innerHTML = '⏳ Mengolah naskah...';
       const prompt = encodeURIComponent(`${style}, ${text.substring(0, 180)}`);
       const imgUrl = `https://image.pollinations.ai/prompt/${prompt}?width=800&height=1000&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
-
-      const img = new Image();
-      img.onload = () => {
-        output.innerHTML = `
-          <h4 style="color:var(--accent); margin-bottom:8px;">✨ Panel Komik Berhasil Di-generate</h4>
-          <img src="${imgUrl}" style="max-width:100%; border-radius:10px; border:1px solid var(--border);" />
-          <a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Unduh Komik</a>
-        `;
-      };
-      img.onerror = () => { output.innerHTML = '❌ Gagal memuat API gambar.'; };
-      img.src = imgUrl;
+      output.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:600px; border-radius:10px; border:1px solid var(--border);" /><br><a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:12px; display:inline-block; text-decoration:none;">📥 Unduh Komik</a>`;
     }
 
-    // 3. FITUR TEXT TO IMAGE (API INTEGRATION)
     function generateImage() {
       const prompt = document.getElementById('tti-prompt').value;
       const model = document.getElementById('tti-model').value;
       const output = document.getElementById('tti-output');
-
       if (!prompt.trim()) return alert('Masukkan prompt gambar!');
-
-      output.innerHTML = '⏳ Menghasilkan gambar via AI Engine...';
+      output.innerHTML = '⏳ Menghasilkan gambar...';
       const encoded = encodeURIComponent(prompt);
       const imgUrl = `https://image.pollinations.ai/prompt/${encoded}?width=800&height=800&model=${model}&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
-
-      const img = new Image();
-      img.onload = () => {
-        output.innerHTML = `
-          <img src="${imgUrl}" style="max-width:100%; border-radius:10px; border:1px solid var(--border);" />
-          <a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Unduh Gambar</a>
-        `;
-      };
-      img.onerror = () => { output.innerHTML = '❌ Gagal membuat gambar.'; };
-      img.src = imgUrl;
+      output.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:600px; border-radius:10px; border:1px solid var(--border);" /><br><a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:12px; display:inline-block; text-decoration:none;">📥 Unduh Gambar</a>`;
     }
 
-    // 4. FITUR VIDEO PROMPT GENERATOR
     function generateVideoPrompt() {
       const text = document.getElementById('video-input-text').value;
       const output = document.getElementById('video-output');
       if (!text.trim()) return alert('Masukkan deskripsi adegan video!');
-
-      output.innerHTML = '⏳ Meracik prompt Wan 2.1 Video...';
+      output.innerHTML = '⏳ Meracik prompt Wan 2.1...';
       setTimeout(() => {
-        output.innerHTML = `
-          <div style="text-align:left; width:100%;">
-            <b style="color:var(--accent);">🎬 Prompt Skenario Video (Wan 2.1 / Wan 2.2):</b>
-            <div style="background:#000; padding:10px; border-radius:6px; margin:8px 0; font-family:monospace; font-size:12px; color:var(--success);">
-              [Cinematic Shot 4K] ${text}, slow motion 60fps, dynamic angle tracking, hyper realistic physics, volumetric lighting, photorealistic rendering --ar 16:9
-            </div>
-            <button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); alert('Prompt disalin!');">📋 Salin Prompt Video</button>
-          </div>
-        `;
+        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">🎬 Prompt Skenario Video:</b><div style="background:#000; padding:12px; border-radius:8px; margin:10px 0; font-family:monospace; font-size:13px; color:var(--success);">[Cinematic Shot 4K] ${text}, slow motion 60fps, dynamic angle tracking, volumetric lighting --ar 16:9</div><button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); alert('Prompt disalin!');">📋 Salin Prompt Video</button></div>`;
       }, 800);
     }
 
-    // 5. FITUR SWAP & OUTPAINTING CONCEPT
     function generateSwapConcept() {
       const text = document.getElementById('swap-input-text').value;
       const output = document.getElementById('swap-output');
-      if (!text.trim()) return alert('Masukkan deskripsi perubahan!');
-
+      if (!text.trim()) return alert('Masukkan deskripsi!');
       output.innerHTML = '⏳ Menyiapkan skenario visual outpainting...';
       setTimeout(() => {
-        output.innerHTML = `
-          <div style="text-align:left; width:100%;">
-            <b style="color:var(--accent);">🎭 Prompt Visual Refinement:</b>
-            <p style="font-size:13px; margin:6px 0;">Gunakan prompt ini di menu <b>Image</b> untuk menghasilkan gambar pengganti:</p>
-            <div style="background:#000; padding:10px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--accent);">
-              photorealistic, ${text}, high quality fabric detail, 8k resolution, exact match lighting, studio portrait
-            </div>
-          </div>
-        `;
+        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">🎭 Prompt Visual Refinement:</b><div style="background:#000; padding:12px; border-radius:8px; font-family:monospace; font-size:13px; color:var(--accent); margin-top:8px;">photorealistic, ${text}, high quality fabric detail, 8k resolution</div></div>`;
       }, 800);
     }
   </script>
 </body>
 </html>
+            
