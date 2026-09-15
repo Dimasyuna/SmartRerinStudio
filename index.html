@@ -1,334 +1,503 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SmartRerinStudio - AI Creative Suite</title>
-  <style>
-    :root {
-      --bg-color: #0b0d17;
-      --card-bg: #15192b;
-      --primary: #6c5ce7;
-      --primary-hover: #5b4bc4;
-      --accent: #a29bfe;
-      --text: #ffffff;
-      --text-dim: #a0a5c0;
-      --border: #252a44;
-      --danger: #ff7675;
-      --success: #55efc4;
+// Smartrerinstudio — Application Logic (script.js)
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Global State
+  let isAdult = false;
+  let isNsfwUnlocked = false;
+  let currentCaptchaAnswer = 0;
+  let heroSlideIndex = 0;
+  let heroInterval = null;
+
+  // Initializations
+  populateYearDropdowns();
+  generateCaptcha();
+  initEventListeners();
+  initHeroSlideshow();
+  loadSavedProjects();
+
+  /* ==========================================================================
+     1. AGE & BOT GATE LOGIC
+     ========================================================================== */
+
+  function populateYearDropdowns() {
+    const currentYear = new Date().getFullYear();
+    const birthYearSelect = document.getElementById('birth-year');
+    const nsfwYearSelect = document.getElementById('nsfw-year');
+
+    for (let y = currentYear; y >= 1940; y--) {
+      if (birthYearSelect) birthYearSelect.add(new Option(y, y));
+      if (nsfwYearSelect) nsfwYearSelect.add(new Option(y, y));
     }
+  }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 70px; }
+  function generateCaptcha() {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    currentCaptchaAnswer = num1 + num2;
 
-    #app { flex: 1; display: flex; flex-direction: column; }
-    .navbar { height: 65px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
-    .logo { font-size: 20px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-
-    .nav-right { display: flex; align-items: center; gap: 8px; }
-
-    /* Navigasi Atas khusus Laptop/Desktop */
-    .desktop-nav { display: none; gap: 12px; }
-    .desktop-nav-item { padding: 8px 16px; border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
-    .desktop-nav-item.active, .desktop-nav-item:hover { background: var(--primary); color: white; }
-
-    .icon-btn { background: #0f1220; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
-    .icon-btn:hover { border-color: var(--primary); }
-
-    .main-content { max-width: 1000px; width: 100%; margin: 0 auto; padding: 24px 16px; }
-    .tool-page { display: none; }
-    .tool-page.active { display: block; }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    .card-title { font-size: 18px; font-weight: 600; margin-bottom: 14px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-    .output-box { min-height: 160px; background: #0f1220; border: 1px dashed var(--border); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-align: center; margin-top: 18px; word-break: break-word; font-size: 15px; }
-
-    .form-group { margin-bottom: 16px; text-align: left; }
-    .form-group label { display: block; font-size: 14px; color: var(--text-dim); margin-bottom: 6px; font-weight: 500; }
-    select, input, textarea { width: 100%; padding: 14px; background: #0f1220; border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; font-size: 15px; }
-    select:focus, input:focus, textarea:focus { border-color: var(--primary); }
-
-    .btn { padding: 14px 22px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; background: var(--card-bg); color: var(--text); font-size: 15px; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-full { width: 100%; }
-
-    /* Toggle Switch Component */
-    .toggle-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #252a44; transition: .3s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--primary); }
-    input:checked + .slider:before { transform: translateX(24px); }
-
-    /* Bottom Nav Mobile */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 11px; cursor: pointer; text-decoration: none; width: 20%; text-align: center; }
-    .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 3px; }
-    .bottom-nav-item.active { color: var(--accent); font-weight: 600; }
-
-    @media (min-width: 768px) {
-      body { padding-bottom: 0; }
-      .bottom-nav { display: none; }
-      .desktop-nav { display: flex; }
-      .main-content { padding: 40px 24px; }
+    const captchaQ = document.getElementById('captcha-question');
+    if (captchaQ) {
+      captchaQ.textContent = `Berapa ${num1} + ${num2}?`;
     }
+  }
 
-    /* Modals */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-    .modal-overlay.active { display: flex; }
-    .modal { background: var(--card-bg); border: 1px solid var(--border); padding: 24px; border-radius: 14px; max-width: 420px; width: 100%; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    .modal-title { font-size: 18px; font-weight: 600; color: var(--accent); }
-    .close-btn { cursor: pointer; color: var(--text-dim); font-size: 20px; }
-    .account-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
-  </style>
-</head>
-<body>
+  function validateGateForm() {
+    const month = document.getElementById('birth-month').value;
+    const year = document.getElementById('birth-year').value;
+    const botCheck = document.getElementById('bot-check').checked;
+    const captchaAns = parseInt(document.getElementById('captcha-answer').value, 10);
+    const submitBtn = document.getElementById('gate-submit');
 
-  <div id="app">
-    <header class="navbar">
-      <div class="logo">🌌 SmartRerinStudio</div>
+    const isDateFilled = month !== '' && year !== '';
+    const isCaptchaCorrect = captchaAns === currentCaptchaAnswer;
 
-      <nav class="desktop-nav">
-        <div class="desktop-nav-item active" data-page="beranda" onclick="showPage('beranda')">Beranda</div>
-        <div class="desktop-nav-item" data-page="novel" onclick="showPage('novel')">Novel</div>
-        <div class="desktop-nav-item" data-page="image" onclick="showPage('image')">Image</div>
-        <div class="desktop-nav-item" data-page="video" onclick="showPage('video')">Video</div>
-        <div class="desktop-nav-item" data-page="swap" onclick="showPage('swap')">Swap</div>
-      </nav>
+    if (submitBtn) {
+      submitBtn.disabled = !(isDateFilled && botCheck && isCaptchaCorrect);
+    }
+  }
 
-      <div class="nav-right">
-        <button class="icon-btn" onclick="openModal('account-modal')">👤 Akun</button>
-        <button class="icon-btn" onclick="openModal('settings-modal')">⚙️ Pengaturan</button>
-      </div>
-    </header>
+  function checkAge(birthMonth, birthYear) {
+    const today = new Date();
+    let age = today.getFullYear() - parseInt(birthYear, 10);
+    const m = (today.getMonth() + 1) - parseInt(birthMonth, 10);
+    if (m < 0 || (m === 0 && today.getDate() < 1)) {
+      age--;
+    }
+    return age >= 18;
+  }
 
-    <main class="main-content">
-      <!-- 1. Beranda -->
-      <section id="page-beranda" class="tool-page active">
-        <div class="card">
-          <div class="card-title">🤖 Asisten Kreatif & Generator Ide</div>
-          <p style="color:var(--text-dim); font-size:14px; margin-bottom:14px;">Masukkan ide dasar naskah atau konsep visual Anda:</p>
-          <textarea id="assistant-input" rows="4" placeholder="Contoh: Buatkan konsep karakter pendekar es bergaun modern..."></textarea>
-          <button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="processAssistant()">Proses Ide CERITA</button>
-          <div id="assistant-output" class="output-box">Hasil racikan ide akan tampil di sini.</div>
-        </div>
-      </section>
+  /* ==========================================================================
+     2. NSFW UNLOCK MODAL LOGIC
+     ========================================================================== */
 
-      <!-- 2. Novel to Comic -->
-      <section id="page-novel" class="tool-page">
-        <div class="card">
-          <div class="card-title">📘 Novel to Comic Generator</div>
-          <div class="form-group">
-            <label>Teks Novel (Cerita / Adegan)</label>
-            <textarea id="novel-input-text" rows="5" placeholder="Tempelkan naskah novel Anda di sini..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Gaya Visual Komik</label>
-            <select id="comic-style">
-              <option value="manhwa webtoon style, vibrant colors">Manhwa / Webtoon</option>
-              <option value="manga style, black and white, detailed line art">Manga Hitam Putih</option>
-              <option value="american comic style, bold lines, retro">American Comic</option>
-              <option value="3d anime render, unreal engine 5 style">3D Anime Render</option>
-            </select>
-          </div>
-          <button class="btn btn-primary btn-full" onclick="generateComic()">Generate Komik</button>
-          <div id="comic-output" class="output-box">Hasil komik visual akan muncul di sini.</div>
-        </div>
-      </section>
+  window.openNsfwModal = function () {
+    const modal = document.getElementById('nsfw-modal');
+    if (modal) modal.classList.add('active');
+  };
 
-      <!-- 3. Text to Image -->
-      <section id="page-image" class="tool-page">
-        <div class="card">
-          <div class="card-title">🎨 Text to Image AI</div>
-          <div class="form-group">
-            <label>Prompt Gambar</label>
-            <textarea id="tti-prompt" rows="3" placeholder="Contoh: Cyberpunk city at night with neon lights, 8k resolution..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Model Engine</label>
-            <select id="tti-model">
-              <option value="flux">Flux Standard</option>
-              <option value="turbo">Turbo Speed</option>
-              <option class="nsfw-model" value="flux-uncensored" style="display:none;">Flux Uncensored (NSFW Mode Active)</option>
-            </select>
-          </div>
-          <button class="btn btn-primary btn-full" onclick="generateImage()">Generate Gambar</button>
-          <div id="tti-output" class="output-box">Gambar hasil generasi akan tampil di sini.</div>
-        </div>
-      </section>
+  window.closeNsfwModal = function () {
+    const modal = document.getElementById('nsfw-modal');
+    if (modal) modal.classList.remove('active');
+  };
 
-      <!-- 4. Video Prompt Generator -->
-      <section id="page-video" class="tool-page">
-        <div class="card">
-          <div class="card-title">🎬 AI Video Scenario & Prompt (Wan 2.1 / Wan 2.2)</div>
-          <div class="form-group">
-            <label>Deskripsi Adegan / Game / Combat</label>
-            <textarea id="video-input-text" rows="3" placeholder="Contoh: Karakter ditembak menggunakan M14 dengan efek slow motion cinematic..."></textarea>
-          </div>
-          <button class="btn btn-primary btn-full" onclick="generateVideoPrompt()">Buat Prompt Video Cinematic</button>
-          <div id="video-output" class="output-box">Prompt skenario video siap pakai akan diracik di sini.</div>
-        </div>
-      </section>
-
-      <!-- 5. Swap Concept -->
-      <section id="page-swap" class="tool-page">
-        <div class="card">
-          <div class="card-title">🎭 Concept & Crafting Assistant</div>
-          <div class="form-group">
-            <label>Deskripsi Perubahan Foto / Swap Outfit</label>
-            <textarea id="swap-input-text" rows="3" placeholder="Contoh: Ubah gaun menjadi Kebaya Pernikahan Adat Jogja warna ungu..."></textarea>
-          </div>
-          <button class="btn btn-primary btn-full" onclick="generateSwapConcept()">Buat Prompt Visual Outpainting</button>
-          <div id="swap-output" class="output-box">Prompt panduan visual akan tampil di sini.</div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Modal Pengaturan -->
-    <div id="settings-modal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title">⚙️ Pengaturan Studio</div>
-          <div class="close-btn" onclick="closeModal('settings-modal')">✕</div>
-        </div>
-        <div class="toggle-container">
-          <div>
-            <div style="font-weight: 600; font-size: 15px;">Fitur NSFW Unlocked</div>
-            <div style="font-size: 12px; color: var(--text-dim);" id="nsfw-status-text">Buka opsi uncensored di alat AI.</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="nsfw-toggle" onchange="toggleNSFW(this.checked)">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Akun -->
-    <div id="account-modal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title">👤 Menu Akun</div>
-          <div class="close-btn" onclick="closeModal('account-modal')">✕</div>
-        </div>
-        <div class="account-actions">
-          <button class="btn" onclick="dummyAction('Profil Saya')">📄 Profil Saya</button>
-          <button class="btn btn-primary" onclick="dummyAction('Sign In')">🔑 Sign In</button>
-          <button class="btn" style="border:1px solid var(--primary);" onclick="dummyAction('Sign Up')">📝 Sign Up</button>
-          <button class="btn" style="color:var(--danger); border:1px solid var(--danger);" onclick="dummyAction('Sign Out')">🚪 Sign Out</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Navigation (Mobile) -->
-    <nav class="bottom-nav">
-      <div class="bottom-nav-item active" data-page="beranda" onclick="showPage('beranda')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Beranda</span>
-      </div>
-      <div class="bottom-nav-item" data-page="novel" onclick="showPage('novel')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span>Novel</span>
-      </div>
-      <div class="bottom-nav-item" data-page="image" onclick="showPage('image')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <span>Image</span>
-      </div>
-      <div class="bottom-nav-item" data-page="video" onclick="showPage('video')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-        <span>Video</span>
-      </div>
-      <div class="bottom-nav-item" data-page="swap" onclick="showPage('swap')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Swap</span>
-      </div>
-    </nav>
-  </div>
-
-  <script>
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-    function toggleNSFW(enabled) {
-      document.querySelectorAll('.nsfw-model').forEach(el => {
-        el.style.display = enabled ? 'block' : 'none';
-      });
-      const statusText = document.getElementById('nsfw-status-text');
-      if (statusText) {
-        statusText.textContent = enabled ? 'Mode NSFW aktif di seluruh alat AI.' : 'Buka opsi uncensored di alat AI.';
+  function applyNsfwState(unlocked) {
+    isNsfwUnlocked = unlocked;
+    const badge = document.getElementById('nsfw-badge');
+    
+    if (badge) {
+      if (unlocked) {
+        badge.textContent = 'NSFW Unlocked';
+        badge.className = 'nsfw-badge unlocked';
+      } else {
+        badge.textContent = 'NSFW Locked';
+        badge.className = 'nsfw-badge locked';
       }
     }
 
-    function dummyAction(name) {
-      alert(`Fitur [${name}] siap dihubungkan ke sistem database/autentikasi.`);
+    // Toggle NSFW models in dropdowns
+    document.querySelectorAll('.nsfw-model').forEach(el => {
+      el.style.display = unlocked ? 'block' : 'none';
+    });
+
+    // Toggle NSFW option rows
+    const nsfwComicRow = document.getElementById('nsfw-option-row');
+    const nsfwNovelRow = document.getElementById('nsfw-novel-row');
+    const nsfwTtiRow = document.getElementById('nsfw-tti-row');
+
+    if (nsfwComicRow) nsfwComicRow.style.display = unlocked ? 'flex' : 'none';
+    if (nsfwNovelRow) nsfwNovelRow.style.display = unlocked ? 'flex' : 'none';
+    if (nsfwTtiRow) nsfwTtiRow.style.display = unlocked ? 'flex' : 'none';
+  }
+
+  /* ==========================================================================
+     3. EVENT LISTENERS SETUP
+     ========================================================================== */
+
+  function initEventListeners() {
+    // Gate inputs
+    const birthMonth = document.getElementById('birth-month');
+    const birthYear = document.getElementById('birth-year');
+    const botCheck = document.getElementById('bot-check');
+    const captchaInput = document.getElementById('captcha-answer');
+    const gateSubmit = document.getElementById('gate-submit');
+    const botCheckBox = document.getElementById('bot-check-box');
+
+    if (botCheckBox) {
+      botCheckBox.addEventListener('click', (e) => {
+        if (e.target.id !== 'bot-check') {
+          const chk = document.getElementById('bot-check');
+          chk.checked = !chk.checked;
+        }
+        const captchaBox = document.getElementById('captcha-box');
+        if (captchaBox) {
+          captchaBox.classList.toggle('active', document.getElementById('bot-check').checked);
+        }
+        validateGateForm();
+      });
     }
 
-    function showPage(pageId) {
-      document.querySelectorAll('.tool-page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.bottom-nav-item, .desktop-nav-item').forEach(n => n.classList.remove('active'));
+    [birthMonth, birthYear, botCheck, captchaInput].forEach(el => {
+      if (el) el.addEventListener('change', validateGateForm);
+      if (el) el.addEventListener('input', validateGateForm);
+    });
 
-      const target = document.getElementById('page-' + pageId);
-      if (target) target.classList.add('active');
-      
-      document.querySelectorAll(`[data-page="${pageId}"]`).forEach(el => el.classList.add('active'));
-      window.scrollTo(0, 0);
+    if (gateSubmit) {
+      gateSubmit.addEventListener('click', () => {
+        const month = birthMonth.value;
+        const year = birthYear.value;
+        const gateErr = document.getElementById('gate-error');
+
+        isAdult = checkAge(month, year);
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+
+        if (isAdult) {
+          applyNsfwState(true);
+        } else {
+          applyNsfwState(false);
+          if (gateErr) {
+            gateErr.textContent = 'Anda berusia di bawah 18 tahun. Fitur NSFW dinonaktifkan.';
+            gateErr.style.display = 'block';
+          }
+        }
+      });
     }
 
-    function processAssistant() {
-      const input = document.getElementById('assistant-input').value;
-      const output = document.getElementById('assistant-output');
-      if(!input.trim()) return alert('Masukkan naskah/ide!');
-      output.innerHTML = '⏳ Meracik naskah & struktur ide...';
-      setTimeout(() => {
-        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">✨ Ringkasan Konsep Cerita:</b><br>• <b>Fokus Utama:</b> ${input}<br>• <b>Rekomendasi Visual:</b> Ultra-detailed 8k, cinematic composition.</div>`;
-      }, 800);
+    // NSFW Modal Unlock Button
+    const nsfwBtn = document.getElementById('nsfw-unlock-btn');
+    if (nsfwBtn) {
+      nsfwBtn.addEventListener('click', () => {
+        const m = document.getElementById('nsfw-month').value;
+        const y = document.getElementById('nsfw-year').value;
+        const err = document.getElementById('nsfw-error');
+
+        if (!m || !y) {
+          if (err) {
+            err.textContent = 'Silakan pilih bulan dan tahun lahir!';
+            err.style.display = 'block';
+          }
+          return;
+        }
+
+        if (checkAge(m, y)) {
+          applyNsfwState(true);
+          closeNsfwModal();
+          if (err) err.style.display = 'none';
+        } else {
+          if (err) {
+            err.textContent = 'Maaf, Anda harus berusia minimal 18 tahun untuk membuka fitur NSFW.';
+            err.style.display = 'block';
+          }
+        }
+      });
     }
 
-    function generateComic() {
-      const text = document.getElementById('novel-input-text').value;
-      const style = document.getElementById('comic-style').value;
-      const output = document.getElementById('comic-output');
-      if (!text.trim()) return alert('Tempel naskah novel dulu!');
-      output.innerHTML = '⏳ Mengolah naskah...';
-      const prompt = encodeURIComponent(`${style}, ${text.substring(0, 180)}`);
-      const imgUrl = `https://image.pollinations.ai/prompt/${prompt}?width=800&height=1000&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
-      output.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:600px; border-radius:10px; border:1px solid var(--border);" /><br><a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:12px; display:inline-block; text-decoration:none;">📥 Unduh Komik</a>`;
+    // Character Selection Grid
+    const charItems = document.querySelectorAll('.char-grid .char-item');
+    charItems.forEach(item => {
+      item.addEventListener('click', function () {
+        if (this.getAttribute('data-char')) {
+          this.classList.toggle('selected');
+        }
+      });
+    });
+
+    // Comic Style Grid
+    const styleItems = document.querySelectorAll('.style-grid .style-item');
+    styleItems.forEach(item => {
+      item.addEventListener('click', function () {
+        styleItems.forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Character Count Tracking
+    const novelText = document.getElementById('novel-text');
+    const charCount = document.getElementById('char-count');
+    if (novelText && charCount) {
+      novelText.addEventListener('input', () => {
+        charCount.textContent = novelText.value.length;
+      });
+    }
+  }
+
+  /* ==========================================================================
+     4. NAVIGATION (PAGE SWITCHING)
+     ========================================================================== */
+
+  window.showPage = function (pageId) {
+    // Hide all pages
+    document.querySelectorAll('.tool-page').forEach(page => {
+      page.classList.remove('active');
+    });
+
+    // Show target page
+    const target = document.getElementById(`page-${pageId}`);
+    if (target) {
+      target.classList.add('active');
     }
 
-    function generateImage() {
-      const prompt = document.getElementById('tti-prompt').value;
-      const model = document.getElementById('tti-model').value;
-      const output = document.getElementById('tti-output');
-      if (!prompt.trim()) return alert('Masukkan prompt gambar!');
-      output.innerHTML = '⏳ Menghasilkan gambar...';
-      const encoded = encodeURIComponent(prompt);
-      const imgUrl = `https://image.pollinations.ai/prompt/${encoded}?width=800&height=800&model=${model}&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
-      output.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:600px; border-radius:10px; border:1px solid var(--border);" /><br><a href="${imgUrl}" target="_blank" class="btn btn-primary" style="margin-top:12px; display:inline-block; text-decoration:none;">📥 Unduh Gambar</a>`;
+    // Update active state in Sidebar & Bottom Nav
+    document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(nav => {
+      if (nav.getAttribute('data-page') === pageId) {
+        nav.classList.add('active');
+      } else {
+        nav.classList.remove('active');
+      }
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /* ==========================================================================
+     5. HERO SLIDESHOW LOGIC
+     ========================================================================== */
+
+  function initHeroSlideshow() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dotsContainer = document.getElementById('hero-dots');
+    if (!slides.length || !dotsContainer) return;
+
+    dotsContainer.innerHTML = '';
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('div');
+      dot.className = `hero-dot ${idx === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => setHeroSlide(idx));
+      dotsContainer.appendChild(dot);
+    });
+
+    heroInterval = setInterval(() => {
+      heroSlideIndex = (heroSlideIndex + 1) % slides.length;
+      setHeroSlide(heroSlideIndex);
+    }, 4000);
+  }
+
+  function setHeroSlide(index) {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+    heroSlideIndex = index;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  }
+
+  /* ==========================================================================
+     6. GENERATOR SIMULATIONS & API LOGIC
+     ========================================================================== */
+
+  window.generateComic = function () {
+    const text = document.getElementById('novel-text').value;
+    const output = document.getElementById('comic-output');
+    const progressWrap = document.getElementById('comic-progress');
+    const progressFill = document.getElementById('comic-progress-fill');
+    const progressText = document.getElementById('comic-progress-text');
+
+    if (!text.trim()) {
+      alert('Silakan masukkan naskah novel Anda terlebih dahulu!');
+      return;
     }
 
-    function generateVideoPrompt() {
-      const text = document.getElementById('video-input-text').value;
-      const output = document.getElementById('video-output');
-      if (!text.trim()) return alert('Masukkan deskripsi adegan video!');
-      output.innerHTML = '⏳ Meracik prompt Wan 2.1...';
-      setTimeout(() => {
-        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">🎬 Prompt Skenario Video:</b><div style="background:#000; padding:12px; border-radius:8px; margin:10px 0; font-family:monospace; font-size:13px; color:var(--success);">[Cinematic Shot 4K] ${text}, slow motion 60fps, dynamic angle tracking, volumetric lighting --ar 16:9</div><button class="btn btn-primary" onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); alert('Prompt disalin!');">📋 Salin Prompt Video</button></div>`;
-      }, 800);
+    progressWrap.style.display = 'block';
+    output.innerHTML = 'Sedang memproses cerita dan merancang panel...';
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 15;
+      if (progress > 100) progress = 100;
+      progressFill.style.width = `${progress}%`;
+
+      if (progress === 30) progressText.textContent = 'Menganalisis karakter dan adegan...';
+      if (progress === 60) progressText.textContent = 'Mengenerate ilustrasi panel komik...';
+      if (progress === 90) progressText.textContent = 'Menambahkan balon kata & dialog...';
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          progressWrap.style.display = 'none';
+          output.innerHTML = `
+            <div style="text-align:left; background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+              <h4 style="color: var(--accent); margin-bottom: 8px;">✨ Komik Berhasil Dibuat!</h4>
+              <p style="font-size: 13px; color: var(--text-primary); margin-bottom: 12px;">
+                Hasil visual komik berdasarkan naskah ("${text.substring(0, 40)}..."):
+              </p>
+              <div style="background: var(--bg-card); border: 1px dashed var(--border); padding: 40px; text-align: center; border-radius: 8px;">
+                🖼️ [Panel Komik 1 - Render Visual AI]
+              </div>
+            </div>
+          `;
+        }, 500);
+      }
+    }, 400);
+  };
+
+  window.generateTextToImage = function () {
+    const prompt = document.getElementById('tti-prompt').value;
+    const output = document.getElementById('tti-output');
+
+    if (!prompt.trim()) {
+      alert('Masukkan prompt gambar terlebih dahulu!');
+      return;
     }
 
-    function generateSwapConcept() {
-      const text = document.getElementById('swap-input-text').value;
-      const output = document.getElementById('swap-output');
-      if (!text.trim()) return alert('Masukkan deskripsi!');
-      output.innerHTML = '⏳ Menyiapkan skenario visual outpainting...';
-      setTimeout(() => {
-        output.innerHTML = `<div style="text-align:left; width:100%;"><b style="color:var(--accent);">🎭 Prompt Visual Refinement:</b><div style="background:#000; padding:12px; border-radius:8px; font-family:monospace; font-size:13px; color:var(--accent); margin-top:8px;">photorealistic, ${text}, high quality fabric detail, 8k resolution</div></div>`;
-      }, 800);
+    output.innerHTML = '⏳ Menghubungkan ke server Pollinations AI...';
+
+    const encodedPrompt = encodeURIComponent(prompt);
+    const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=800&height=800&seed=${Math.floor(Math.random() * 1000)}`;
+
+    const img = new Image();
+    img.src = imageUrl;
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '8px';
+    img.style.marginTop = '10px';
+
+    img.onload = () => {
+      output.innerHTML = '';
+      output.appendChild(img);
+    };
+
+    img.onerror = () => {
+      output.innerHTML = '❌ Gagal memuat gambar dari server Pollinations. Silakan coba lagi.';
+    };
+  };
+
+  window.mockGenerate = function (outputId) {
+    const output = document.getElementById(outputId);
+    if (!output) return;
+
+    output.innerHTML = '⏳ Memproses data dengan model AI...';
+
+    setTimeout(() => {
+      output.innerHTML = `
+        <div style="color: var(--success); font-weight: 600; padding: 10px;">
+          ✅ Berhasil Diproses! (Mode Demonstrasi)
+        </div>
+      `;
+    }, 1500);
+  };
+
+  /* ==========================================================================
+     7. AI ASSISTANT CHAT
+     ========================================================================== */
+
+  window.sendAssistant = function () {
+    const input = document.getElementById('assistant-input');
+    const body = document.getElementById('assistant-body');
+    if (!input || !body) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    // User Message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'assistant-msg user';
+    userMsg.textContent = text;
+    body.appendChild(userMsg);
+    input.value = '';
+
+    body.scrollTop = body.scrollHeight;
+
+    // Bot Response Simulation
+    setTimeout(() => {
+      const botMsg = document.createElement('div');
+      botMsg.className = 'assistant-msg bot';
+      botMsg.textContent = `Asisten: Saya siap membantu Anda mengolah "${text}". Untuk hasil terbaik pada novel/komik, pastikan menyertakan deskripsi visual karakter yang mendetail.`;
+      body.appendChild(botMsg);
+      body.scrollTop = body.scrollHeight;
+    }, 800);
+  };
+
+  /* ==========================================================================
+     8. PROJECTS & FEEDBACK (LOCAL STORAGE)
+     ========================================================================== */
+
+  window.saveProject = function () {
+    const titleInput = document.getElementById('novel-title');
+    const textInput = document.getElementById('novel-text');
+
+    const title = titleInput && titleInput.value ? titleInput.value : 'Proyek Tanpa Judul';
+    const text = textInput ? textInput.value : '';
+
+    if (!text.trim()) {
+      alert('Tidak ada isi cerita yang bisa disimpan!');
+      return;
     }
-  </script>
-</body>
-</html>
-            
+
+    const projects = JSON.parse(localStorage.getItem('smartrerin_projects') || '[]');
+    projects.push({
+      id: Date.now(),
+      title: title,
+      date: new Date().toLocaleDateString('id-ID'),
+      preview: text.substring(0, 60) + '...'
+    });
+
+    localStorage.setItem('smartrerin_projects', JSON.stringify(projects));
+    alert('Proyek berhasil disimpan!');
+    loadSavedProjects();
+  };
+
+  function loadSavedProjects() {
+    const list = document.getElementById('project-list');
+    if (!list) return;
+
+    const projects = JSON.parse(localStorage.getItem('smartrerin_projects') || '[]');
+
+    if (projects.length === 0) {
+      list.innerHTML = `
+        <div style="text-align:center;color:var(--text-muted);padding:30px;">
+          Belum ada proyek tersimpan.<br>
+          <small>Generate & simpan dari Novel to Comic untuk melihat di sini.</small>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = projects.map(p => `
+      <div class="project-item">
+        <div class="project-thumb">📖</div>
+        <div class="project-info">
+          <div class="project-title">${escapeHtml(p.title)}</div>
+          <div class="project-meta">${p.date} • ${escapeHtml(p.preview)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.submitFeedback = function () {
+    const name = document.getElementById('feedback-name').value;
+    const type = document.getElementById('feedback-type').value;
+    const msg = document.getElementById('feedback-msg').value;
+    const successBox = document.getElementById('feedback-success');
+
+    if (!msg.trim()) {
+      alert('Silakan tuliskan pesan masukan Anda!');
+      return;
+    }
+
+    const feedbacks = JSON.parse(localStorage.getItem('smartrerin_feedbacks') || '[]');
+    feedbacks.push({ name, type, msg, date: new Date().toISOString() });
+    localStorage.setItem('smartrerin_feedbacks', JSON.stringify(feedbacks));
+
+    if (successBox) successBox.style.display = 'block';
+
+    document.getElementById('feedback-name').value = '';
+    document.getElementById('feedback-msg').value = '';
+
+    setTimeout(() => {
+      if (successBox) successBox.style.display = 'none';
+    }, 4000);
+  };
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    }[m]));
+  }
+});
