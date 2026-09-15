@@ -112,7 +112,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .content-box {
@@ -120,12 +120,21 @@
       padding-top: 20px;
       margin-top: 20px;
     }
+
+    .nsfw-area {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Form Verifikasi Usia Standar -->
+    <!-- Form Verifikasi Usia Standar (Langkah 1) -->
     <div id="age-verification-form">
       <h1>Verifikasi Usia</h1>
       <p>Silakan masukkan tanggal lahir Anda untuk mengakses situs ini.</p>
@@ -160,16 +169,17 @@
       <button id="submit-age">Masuk</button>
     </div>
 
-    <!-- Halaman Konten Utama -->
+    <!-- Halaman Konten Utama (Langkah 2) -->
     <div id="main-content" class="hidden">
       <h1>Selamat Datang!</h1>
       <p>Anda telah berhasil memverifikasi usia Anda.</p>
 
       <div class="content-box">
         <h2>Akses Khusus (NSFW 18+)</h2>
-        <p>Konten ini membutuhkan verifikasi usia tambahan khusus (18+).</p>
         
+        <!-- Form NSFW (Tampil sebelum diisi) -->
         <div id="nsfw-form">
+          <p>Konten ini membutuhkan verifikasi usia tambahan khusus (18+).</p>
           <div class="form-group">
             <label>Konfirmasi Tanggal Lahir (18+)</label>
             <div class="date-inputs">
@@ -199,15 +209,16 @@
           <button id="submit-nsfw" class="danger-btn">Buka Akses NSFW</button>
         </div>
 
-        <div id="nsfw-content" class="hidden">
-          <p style="color: #ef4444; font-weight: bold;">[ Konten NSFW 18+ Berhasil Diberikan ]</p>
+        <!-- Area Konten Terkunci NSFW (Hanya Tampil Setelah Lolos 18+) -->
+        <div id="nsfw-content" class="hidden nsfw-area">
+          <h3 style="color: #ef4444; margin-bottom: 10px;">Akses Diberikan!</h3>
+          <p style="color: #f8fafc; margin-bottom: 0;">Ini adalah area konten dewasa (NSFW 18+). Anda bisa memasukkan link, gambar, atau konten khusus di bagian ini.</p>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Fungsi untuk mengisi opsi Hari (1-31)
     function populateDays(selectId) {
       const select = document.getElementById(selectId);
       if (!select) return;
@@ -219,7 +230,6 @@
       }
     }
 
-    // Fungsi untuk mengisi opsi Tahun secara otomatis
     function populateYears(selectId) {
       const select = document.getElementById(selectId);
       if (!select) return;
@@ -235,7 +245,6 @@
       }
     }
 
-    // Fungsi untuk menghitung usia
     function calculateAge(day, month, year) {
       const today = new Date();
       const birthDate = new Date(year, month - 1, day);
@@ -248,17 +257,12 @@
       return age;
     }
 
-    // Inisialisasi Opsi Form saat DOM selesai dimuat
     document.addEventListener('DOMContentLoaded', () => {
-      // Isi dropdown Hari
       populateDays('birth-day');
       populateDays('nsfw-day');
-
-      // Isi dropdown Tahun
       populateYears('birth-year');
       populateYears('nsfw-year');
 
-      // Handling Submit Form Usia Standar
       document.getElementById('submit-age').addEventListener('click', () => {
         const day = document.getElementById('birth-day').value;
         const month = document.getElementById('birth-month').value;
@@ -279,14 +283,13 @@
         }
       });
 
-      // Handling Submit Form NSFW (18+)
       document.getElementById('submit-nsfw').addEventListener('click', () => {
         const day = document.getElementById('nsfw-day').value;
         const month = document.getElementById('nsfw-month').value;
         const year = document.getElementById('nsfw-year').value;
 
         if (!day || !month || !year) {
-          alert('Silakan pilih tanggal, bulan, dan tahun lahir untuk konfirmasi!');
+          alert('Silakan pilih tanggal, bulan, dan tahun lahir untuk verifikasi 18+!');
           return;
         }
 
@@ -302,4 +305,5 @@
     });
   </script>
 </body>
-</html>
+  </html>
+  
