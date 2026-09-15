@@ -134,7 +134,7 @@
 <body>
 
   <div class="container">
-    <!-- Form Verifikasi Usia Standar (Langkah 1) -->
+    <!-- Form Verifikasi Usia Awal -->
     <div id="age-verification-form">
       <h1>Verifikasi Usia</h1>
       <p>Silakan masukkan tanggal lahir Anda untuk mengakses situs ini.</p>
@@ -169,56 +169,30 @@
       <button id="submit-age">Masuk</button>
     </div>
 
-    <!-- Halaman Konten Utama (Langkah 2) -->
+    <!-- Halaman Utama -->
     <div id="main-content" class="hidden">
       <h1>Selamat Datang!</h1>
       <p>Anda telah berhasil memverifikasi usia Anda.</p>
 
       <div class="content-box">
         <h2>Akses Khusus (NSFW 18+)</h2>
-        
-        <!-- Form NSFW (Tampil sebelum diisi) -->
-        <div id="nsfw-form">
-          <p>Konten ini membutuhkan verifikasi usia tambahan khusus (18+).</p>
-          <div class="form-group">
-            <label>Konfirmasi Tanggal Lahir (18+)</label>
-            <div class="date-inputs">
-              <select id="nsfw-day">
-                <option value="">Hari</option>
-              </select>
-              <select id="nsfw-month">
-                <option value="">Bulan</option>
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4">April</option>
-                <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">Desember</option>
-              </select>
-              <select id="nsfw-year">
-                <option value="">Tahun</option>
-              </select>
-            </div>
-          </div>
-          <button id="submit-nsfw" class="danger-btn">Buka Akses NSFW</button>
-        </div>
+        <p>Akses ini hanya diperuntukkan bagi pengguna berusia 18 tahun ke atas.</p>
 
-        <!-- Area Konten Terkunci NSFW (Hanya Tampil Setelah Lolos 18+) -->
+        <!-- Tombol untuk Membuka Akses NSFW -->
+        <button id="btn-toggle-nsfw" class="danger-btn">Buka Akses NSFW</button>
+
+        <!-- Area Konten NSFW (Awalnya Tersembunyi) -->
         <div id="nsfw-content" class="hidden nsfw-area">
           <h3 style="color: #ef4444; margin-bottom: 10px;">Akses Diberikan!</h3>
-          <p style="color: #f8fafc; margin-bottom: 0;">Ini adalah area konten dewasa (NSFW 18+). Anda bisa memasukkan link, gambar, atau konten khusus di bagian ini.</p>
+          <p style="color: #f8fafc; margin-bottom: 0;">Ini adalah area konten dewasa (NSFW 18+). Masukkan konten atau media khusus Anda di sini.</p>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    let userAge = 0; // Menyimpan data umur dari login awal
+
     function populateDays(selectId) {
       const select = document.getElementById(selectId);
       if (!select) return;
@@ -259,10 +233,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       populateDays('birth-day');
-      populateDays('nsfw-day');
       populateYears('birth-year');
-      populateYears('nsfw-year');
 
+      // Proses Login Awal
       document.getElementById('submit-age').addEventListener('click', () => {
         const day = document.getElementById('birth-day').value;
         const month = document.getElementById('birth-month').value;
@@ -273,9 +246,9 @@
           return;
         }
 
-        const age = calculateAge(day, month, year);
+        userAge = calculateAge(day, month, year);
 
-        if (age >= 13) {
+        if (userAge >= 13) {
           document.getElementById('age-verification-form').classList.add('hidden');
           document.getElementById('main-content').classList.remove('hidden');
         } else {
@@ -283,27 +256,17 @@
         }
       });
 
-      document.getElementById('submit-nsfw').addEventListener('click', () => {
-        const day = document.getElementById('nsfw-day').value;
-        const month = document.getElementById('nsfw-month').value;
-        const year = document.getElementById('nsfw-year').value;
-
-        if (!day || !month || !year) {
-          alert('Silakan pilih tanggal, bulan, dan tahun lahir untuk verifikasi 18+!');
-          return;
-        }
-
-        const age = calculateAge(day, month, year);
-
-        if (age >= 18) {
-          document.getElementById('nsfw-form').classList.add('hidden');
+      // Proses Tombol Buka Akses NSFW
+      document.getElementById('btn-toggle-nsfw').addEventListener('click', () => {
+        if (userAge >= 18) {
           document.getElementById('nsfw-content').classList.remove('hidden');
+          document.getElementById('btn-toggle-nsfw').classList.add('hidden'); // Sembunyikan tombol setelah diklik
         } else {
-          alert('Maaf, Anda harus berusia minimal 18 tahun untuk membuka konten ini.');
+          alert('Akses ditolak. Anda harus berusia minimal 18 tahun untuk melihat konten ini.');
         }
       });
     });
   </script>
 </body>
-  </html>
+</html>
   
