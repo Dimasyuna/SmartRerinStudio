@@ -111,10 +111,6 @@
       background-color: #dc2626;
     }
 
-    .hidden {
-      display: none !important;
-    }
-
     .content-box {
       border-top: 1px solid var(--border-color);
       padding-top: 20px;
@@ -169,8 +165,8 @@
       <button id="submit-age">Masuk</button>
     </div>
 
-    <!-- Halaman Utama -->
-    <div id="main-content" class="hidden">
+    <!-- Halaman Utama (Langsung Disembunyikan di Awal) -->
+    <div id="main-content" style="display: none;">
       <h1>Selamat Datang!</h1>
       <p>Anda telah berhasil memverifikasi usia Anda.</p>
 
@@ -178,11 +174,11 @@
         <h2>Akses Khusus (NSFW 18+)</h2>
         <p>Akses ini hanya diperuntukkan bagi pengguna berusia 18 tahun ke atas.</p>
 
-        <!-- Tombol untuk Membuka Akses NSFW -->
+        <!-- Tombol Buka Akses -->
         <button id="btn-toggle-nsfw" class="danger-btn">Buka Akses NSFW</button>
 
-        <!-- Area Konten NSFW (Awalnya Tersembunyi) -->
-        <div id="nsfw-content" class="hidden nsfw-area">
+        <!-- Kotak Konten NSFW (Pasti Tersembunyi Pakai Inline Style) -->
+        <div id="nsfw-content" class="nsfw-area" style="display: none;">
           <h3 style="color: #ef4444; margin-bottom: 10px;">Akses Diberikan!</h3>
           <p style="color: #f8fafc; margin-bottom: 0;">Ini adalah area konten dewasa (NSFW 18+). Masukkan konten atau media khusus Anda di sini.</p>
         </div>
@@ -191,7 +187,7 @@
   </div>
 
   <script>
-    let userAge = 0; // Menyimpan data umur dari login awal
+    let userAge = 0;
 
     function populateDays(selectId) {
       const select = document.getElementById(selectId);
@@ -235,7 +231,7 @@
       populateDays('birth-day');
       populateYears('birth-year');
 
-      // Proses Login Awal
+      // Login Awal
       document.getElementById('submit-age').addEventListener('click', () => {
         const day = document.getElementById('birth-day').value;
         const month = document.getElementById('birth-month').value;
@@ -249,18 +245,18 @@
         userAge = calculateAge(day, month, year);
 
         if (userAge >= 13) {
-          document.getElementById('age-verification-form').classList.add('hidden');
-          document.getElementById('main-content').classList.remove('hidden');
+          document.getElementById('age-verification-form').style.display = 'none';
+          document.getElementById('main-content').style.display = 'block';
         } else {
           alert('Maaf, Anda harus berusia minimal 13 tahun untuk mengakses situs ini.');
         }
       });
 
-      // Proses Tombol Buka Akses NSFW
+      // Tombol Buka NSFW
       document.getElementById('btn-toggle-nsfw').addEventListener('click', () => {
         if (userAge >= 18) {
-          document.getElementById('nsfw-content').classList.remove('hidden');
-          document.getElementById('btn-toggle-nsfw').classList.add('hidden'); // Sembunyikan tombol setelah diklik
+          document.getElementById('nsfw-content').style.display = 'block';
+          document.getElementById('btn-toggle-nsfw').style.display = 'none';
         } else {
           alert('Akses ditolak. Anda harus berusia minimal 18 tahun untuk melihat konten ini.');
         }
@@ -269,4 +265,3 @@
   </script>
 </body>
 </html>
-  
